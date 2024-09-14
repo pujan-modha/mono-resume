@@ -40,7 +40,7 @@ const Resume: React.FC<ResumeProps> = ({ data, sectionOrder }) => {
   return (
     <main
       id={ResumeConfig.ResumeHasBackgroundPattern ? "bg-pattern" : ""}
-      className={`resume-main bg-fixed print:grayscale min-h-[100svh] ${
+      className={`resume-main bg-fixed min-h-[100svh] ${
         ResumeConfig.ResumeHasLightBackground
           ? "bg-mono_background"
           : "bg-mono_primary"
