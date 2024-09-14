@@ -31,11 +31,6 @@ export async function POST(request: Request) {
       body: JSON.stringify({ html }),
     });
 
-    if (response.status === 429) {
-      const errorData = await response.json();
-      return NextResponse.json({ error: errorData.error }, { status: 429 });
-    }
-
     if (!response.ok) {
       const errorText = await response.text();
       console.error(

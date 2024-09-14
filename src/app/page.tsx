@@ -34,16 +34,17 @@ import Image from "next/image";
 
 const PDF_LIMIT = 60;
 const LIMIT_PERIOD = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const COOLDOWN_PERIOD = 10000; // 10 seconds in milliseconds
 
-const canGeneratePDF = (count: number, lastTime: number) => {
+const canGeneratePDF = (count: number, firstTime: number) => {
   const currentTime = Date.now();
-  return currentTime - lastTime > LIMIT_PERIOD || count < PDF_LIMIT;
+  return currentTime - firstTime > LIMIT_PERIOD || count < PDF_LIMIT;
 };
 
-const calculateTimeRemaining = (lastTime: number) => {
+const calculateTimeRemaining = (firstGenerationTime: number) => {
   const currentTime = Date.now();
-  const timeElapsed = currentTime - lastTime;
-  const timeRemaining = Math.max(LIMIT_PERIOD - timeElapsed, 0);
+  const endTime = firstGenerationTime + LIMIT_PERIOD;
+  const timeRemaining = Math.max(endTime - currentTime, 0);
   const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
   const minutes = Math.floor((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
   return { hours, minutes };
@@ -77,7 +78,7 @@ export default function Home() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [totalPDFsGenerated, setTotalPDFsGenerated] = useState<number>(0);
   const [, setPdfGenerationCount] = useState<number>(0);
-  const [, setLastPdfGenerationTime] = useState<number>(0);
+  const [, setFirstGenerationTime] = useState<number>(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadComplete, setIsDownloadComplete] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -86,8 +87,11 @@ export default function Home() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [, setLimitReached] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0 });
-  const [is429Error, setIs429Error] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState({ hours: 24, minutes: 0 });
+  const [remainingGenerations, setRemainingGenerations] =
+    useState<number>(PDF_LIMIT);
+  const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
 
   const mainResumeRef = useRef(null);
   const previewResumeRef = useRef(null);
@@ -106,17 +110,28 @@ export default function Home() {
   };
 
   const generatePDF = async () => {
+    const currentTime = Date.now();
+    if (currentTime - lastGenerationTime < COOLDOWN_PERIOD) {
+      console.log(
+        `Please wait ${cooldownRemaining} seconds before generating another PDF.`
+      );
+      return;
+    }
+
+    setLastGenerationTime(currentTime);
+    setCooldownRemaining(10);
+
     const storedData = localStorage.getItem("pdfGenerationData");
     let count = 0;
-    let lastTime = 0;
+    let firstTime = 0;
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       count = parsedData.count;
-      lastTime = parsedData.lastTime;
+      firstTime = parsedData.firstTime || Date.now(); // Ensure firstTime is always a number
     }
 
-    if (!canGeneratePDF(count, lastTime)) {
-      const remaining = calculateTimeRemaining(lastTime);
+    if (!canGeneratePDF(count, firstTime)) {
+      const remaining = calculateTimeRemaining(firstTime);
       setTimeRemaining(remaining);
       setLimitReached(true);
       setShowLimitDialog(true);
@@ -131,7 +146,6 @@ export default function Home() {
     setCurrentFunFact(getRandomFunFact());
     setIsDownloadComplete(false);
     setLimitReached(false);
-    setIs429Error(false);
     console.log("Starting PDF generation");
 
     try {
@@ -183,21 +197,18 @@ export default function Home() {
         const newTotalCount = await fetchTotalPDFsGenerated();
         setTotalPDFsGenerated(newTotalCount);
         const newCount = count + 1;
-        const newLastTime = Date.now();
+        const newFirstTime = firstTime === 0 ? Date.now() : firstTime;
         localStorage.setItem(
           "pdfGenerationData",
-          JSON.stringify({ count: newCount, lastTime: newLastTime })
+          JSON.stringify({ count: newCount, firstTime: newFirstTime })
         );
         setPdfGenerationCount(newCount);
-        setLastPdfGenerationTime(newLastTime);
+        setFirstGenerationTime(newFirstTime);
         setIsDownloadComplete(true);
-      } else if (response.status === 429) {
-        const data = await response.json();
-        console.error("Failed to generate PDF:", data.error);
-        setLimitReached(true);
-        setIs429Error(true);
-        setShowLimitDialog(true);
-        setShowDialog(false);
+        const remaining = Math.max(PDF_LIMIT - newCount, 0);
+        setRemainingGenerations(remaining);
+        const newTimeRemaining = calculateTimeRemaining(newFirstTime);
+        setTimeRemaining(newTimeRemaining);
       } else {
         console.error("Failed to generate PDF:", await response.text());
       }
@@ -208,6 +219,16 @@ export default function Home() {
       console.log("PDF generation process finished");
     }
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (cooldownRemaining > 0) {
+      intervalId = setInterval(() => {
+        setCooldownRemaining((prev) => Math.max(prev - 1, 0));
+      }, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [cooldownRemaining]);
 
   const closeAlertDialog = () => {
     setShowDialog(false);
@@ -310,6 +331,17 @@ export default function Home() {
     const fetchData = async () => {
       const count = await fetchTotalPDFsGenerated();
       setTotalPDFsGenerated(count);
+
+      const storedData = localStorage.getItem("pdfGenerationData");
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        const remaining = Math.max(PDF_LIMIT - parsedData.count, 0);
+        setRemainingGenerations(remaining);
+        const storedFirstTime = parsedData.firstTime || Date.now(); // Ensure a valid number
+        const remainingTime = calculateTimeRemaining(storedFirstTime);
+        setTimeRemaining(remainingTime);
+        setFirstGenerationTime(storedFirstTime);
+      }
     };
     fetchData();
 
@@ -326,24 +358,44 @@ export default function Home() {
       "Volunteering",
     ];
     setSectionOrder(defaultSectionOrder);
+
+    // Set up an interval to update the time remaining every minute
+    const intervalId = setInterval(() => {
+      const storedData = localStorage.getItem("pdfGenerationData");
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        const storedFirstTime = parsedData.firstTime || Date.now(); // Ensure a valid number
+        const remainingTime = calculateTimeRemaining(storedFirstTime);
+        setTimeRemaining(remainingTime);
+      }
+    }, 60000); // Update every minute
+
+    return () => clearInterval(intervalId); // Clean up the interval on component unmount
   }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "p") {
         event.preventDefault();
+        if (cooldownRemaining > 0) {
+          console.log(
+            `Please wait ${cooldownRemaining} seconds before generating another PDF.`
+          );
+          return;
+        }
+
         const storedData = localStorage.getItem("pdfGenerationData");
         let count = 0;
-        let lastTime = 0;
+        let firstTime = 0;
         if (storedData) {
           const parsedData = JSON.parse(storedData);
           count = parsedData.count;
-          lastTime = parsedData.lastTime;
+          firstTime = parsedData.firstTime;
         }
-        if (canGeneratePDF(count, lastTime)) {
+        if (canGeneratePDF(count, firstTime)) {
           generatePDF();
         } else {
-          const remaining = calculateTimeRemaining(lastTime);
+          const remaining = calculateTimeRemaining(firstTime);
           setTimeRemaining(remaining);
           setLimitReached(true);
           setShowLimitDialog(true);
@@ -367,52 +419,26 @@ export default function Home() {
           <div className="border-r">
             <div className="fixed left-0 top-0 w-full xl:w-1/2 z-50">
               <div className="sticky top-0 bg-white border-b shadow-sm">
-                <div className="max-w-screen-md flex h-16 w-full m-auto px-4 2xl:px-0">
-                  <div className="my-auto text-xl lg:text-xl font-medium cursor-pointer hover:bg-mono_primary bg-mono_foreground duration-300 h-16 text-mono_background select-none flex">
-                    <div className="my-auto px-1">
-                      <p className="text-nowrap leading-none">Mono</p>
-                      <p className="text-nowrap leading-none">Resume</p>
+                <div className="max-w-screen-md flex flex-col w-full m-auto px-4 2xl:px-0">
+                  <div className="flex h-16 w-full">
+                    <div className="my-auto text-xl lg:text-xl font-medium cursor-pointer hover:bg-mono_primary bg-mono_foreground duration-300 h-16 text-mono_background select-none flex">
+                      <div className="my-auto px-1">
+                        <p className="text-nowrap leading-none">Mono</p>
+                        <p className="text-nowrap leading-none">Resume</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex ml-auto my-auto gap-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            disabled={!resumeData}
-                            onClick={() => downloadHTML().catch(console.error)}
-                            variant="secondary"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              className="size-4 mr-1"
+                    <div className="flex ml-auto my-auto gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              disabled={!resumeData}
+                              onClick={() =>
+                                downloadHTML().catch(console.error)
+                              }
+                              variant="secondary"
                             >
-                              <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-                              <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-                            </svg>
-                            <p className="block lg:hidden">HTML</p>
-                            <p className="hidden lg:block">Download HTML</p>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="hidden lg:block">
-                          Or press Ctrl + S
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            disabled={!resumeData || isDownloading}
-                            onClick={generatePDF}
-                          >
-                            {isDownloading ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20"
@@ -422,18 +448,60 @@ export default function Home() {
                                 <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
                                 <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
                               </svg>
-                            )}
-                            <p className="block lg:hidden">PDF</p>
-                            <p className="hidden lg:block">
-                              {isDownloading ? "Generating..." : "Download PDF"}
-                            </p>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="hidden lg:block">
-                          Or press Ctrl + P
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                              <p className="block lg:hidden">HTML</p>
+                              <p className="hidden lg:block">Download HTML</p>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="hidden lg:block">
+                            Or press Ctrl + S
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              disabled={
+                                !resumeData ||
+                                isDownloading ||
+                                cooldownRemaining > 0
+                              }
+                              onClick={generatePDF}
+                            >
+                              {isDownloading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                  className="size-4 mr-1"
+                                >
+                                  <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+                                  <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+                                </svg>
+                              )}
+                              <p className="block lg:hidden">
+                                {cooldownRemaining > 0
+                                  ? `Wait (${cooldownRemaining}s)`
+                                  : "PDF"}
+                              </p>
+                              <p className="hidden lg:block">
+                                {isDownloading
+                                  ? "Generating..."
+                                  : cooldownRemaining > 0
+                                  ? `Wait (${cooldownRemaining}s)`
+                                  : "Download PDF"}
+                              </p>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="hidden lg:block">
+                            Or press Ctrl + P
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -443,6 +511,12 @@ export default function Home() {
               id="scroll-to-top"
             >
               <div className="max-w-screen-md w-full mx-auto my-4 px-4 2xl:px-0">
+                {/* <div className="flex mb-2 justify-between items-start text-sm text-gray-600">
+                  <span>Remaining PDF generations: {remainingGenerations}</span>
+                  <span>
+                    Resets in: {timeRemaining.hours}h {timeRemaining.minutes}m
+                  </span>
+                </div> */}
                 <div className="border-2 p-4 mb-4 bg-yellow-100 border-yellow-400 text-yellow-900 text-pretty">
                   <p className="text-xs md:text-sm text-pretty">
                     Note: Include only relevant sections for a more concise and
@@ -595,61 +669,68 @@ export default function Home() {
                   <p className="text-pretty">{currentFunFact.fact}</p>
                 </div>
               )}
-              <div className="w-full grid md:grid-cols-2 gap-2">
-                <Link
-                  href="https://www.buymeacoffee.com/pujan_modha"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button
-                    variant="outline"
-                    className="w-full flex items-center justify-center gap-2 bg-yellow-100 text-yellow-900 border-yellow-400 hover:bg-yellow-200 hover:border-yellow-500 hover:text-yellow-950"
-                  >
-                    <Image
-                      src="/bmac-logo.svg"
-                      alt="Buy Me a Coffee"
-                      width={16}
-                      height={16}
-                    />
-                    <span className="font-bold">Buy Me a Coffee</span>
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-center gap-2 bg-green-100 text-green-900 border-green-400 hover:bg-green-200 hover:border-green-500 hover:text-green-950"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator
-                        .share({
-                          title: "Mono Resume",
-                          text: "Check out this awesome resume builder!!",
-                          url: "https://mono-resume.pujan.pm",
-                        })
-                        .catch(console.error);
-                    } else {
-                      navigator.clipboard
-                        .writeText("https://mono-resume.pujan.pm")
-                        .then(() => alert("Link copied to clipboard!!"))
-                        .catch(console.error);
-                    }
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="size-5"
-                  >
-                    <path d="M13 4.5a2.5 2.5 0 1 1 .702 1.737L6.97 9.604a2.518 2.518 0 0 1 0 .792l6.733 3.367a2.5 2.5 0 1 1-.671 1.341l-6.733-3.367a2.5 2.5 0 1 1 0-3.475l6.733-3.366A2.52 2.52 0 0 1 13 4.5Z" />
-                  </svg>
-                  <span className="font-bold">Share</span>
-                </Button>
-              </div>
               <div className="text-sm text-neutral-700">
                 {isDownloadComplete ? (
                   <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                      <p>Resume Downloaded Successfully!!</p>
+                    <div className="flex md:flex-row flex-col items-center justify-between h-8">
+                      <span className="text-sm text-gray-600">
+                        Remaining PDF generations: {remainingGenerations}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        Resets in: {timeRemaining.hours}h{" "}
+                        {timeRemaining.minutes}m
+                      </span>
+                    </div>
+                    <div className="w-full grid md:grid-cols-2 gap-4">
+                      <Link
+                        href="https://www.buymeacoffee.com/pujan_modha"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full flex items-center justify-center gap-2 bg-yellow-100 text-yellow-900 border-yellow-400 hover:bg-yellow-200 hover:border-yellow-500 hover:text-yellow-950"
+                        >
+                          <Image
+                            src="/bmac-logo.svg"
+                            alt="Buy Me a Coffee"
+                            width={16}
+                            height={16}
+                            className="w-[16px] h-auto"
+                          />
+                          <span className="font-bold">Buy Me a Coffee</span>
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        className="w-full flex items-center justify-center gap-2 bg-green-100 text-green-900 border-green-400 hover:bg-green-200 hover:border-green-500 hover:text-green-950"
+                        onClick={() => {
+                          if (navigator.share) {
+                            navigator
+                              .share({
+                                title: "Mono Resume",
+                                text: "Check out this awesome resume builder!!",
+                                url: "https://mono-resume.pujan.pm",
+                              })
+                              .catch(console.error);
+                          } else {
+                            navigator.clipboard
+                              .writeText("https://mono-resume.pujan.pm")
+                              .then(() => alert("Link copied to clipboard!!"))
+                              .catch(console.error);
+                          }
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="size-5"
+                        >
+                          <path d="M13 4.5a2.5 2.5 0 1 1 .702 1.737L6.97 9.604a2.518 2.518 0 0 1 0 .792l6.733 3.367a2.5 2.5 0 1 1-.671 1.341l-6.733-3.367a2.5 2.5 0 1 1 0-3.475l6.733-3.366A2.52 2.52 0 0 1 13 4.5Z" />
+                        </svg>
+                        <span className="font-bold">Share</span>
+                      </Button>
                     </div>
                     <Button onClick={closeAlertDialog}>Close</Button>
                   </div>
@@ -673,18 +754,11 @@ export default function Home() {
             <AlertDialogDescription />
             <div className="flex flex-col space-y-4 text-left">
               <div className="text-sm text-neutral-700">
-                {is429Error ? (
-                  <p>
-                    You have reached the PDF generation limit. Please try again
-                    after some time.
-                  </p>
-                ) : (
-                  <p>
-                    You have reached the PDF generation limit for the last 24
-                    hours. Please try again in {timeRemaining.hours} hours and{" "}
-                    {timeRemaining.minutes} minutes.
-                  </p>
-                )}
+                <p>
+                  You have reached the PDF generation limit. Please try again in{" "}
+                  {timeRemaining.hours} hours and {timeRemaining.minutes}{" "}
+                  minutes.
+                </p>
               </div>
               <Button onClick={closeLimitDialog}>Close</Button>
             </div>
