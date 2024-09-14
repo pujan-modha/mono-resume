@@ -1,14 +1,13 @@
 import React, { useEffect } from "react";
-import useResumeForm from "./forms/ResumeFormLogic";
-import ResumeFormLayout from "./forms/ResumeFormLayout";
-import { ResumeData } from "./schemas/ResumeSchema";
+import useResumeForm from "./ResumeFormLogic";
+import ResumeFormLayout from "./ResumeFormLayout";
+import { ResumeData } from "@/app/schemas/ResumeSchema";
 
 interface ResumeFormProps {
   onSubmit: (data: ResumeData) => void;
   sectionOrder: string[];
   setSectionOrder: React.Dispatch<React.SetStateAction<string[]>>;
 }
-
 
 const ResumeForm: React.FC<ResumeFormProps> = ({
   onSubmit,

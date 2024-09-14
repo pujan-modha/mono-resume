@@ -2,14 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-@media print {
-  @page {
-    size: A4;
-  }
-}
-
 @layer base {
   :root {
     --radius: 0rem;
   }
+}
+
+::selection {
+  color: #f8f8f2;
+  background: #282a36;
 }

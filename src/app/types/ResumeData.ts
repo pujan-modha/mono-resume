@@ -1,7 +1,8 @@
 export interface ResumeData {
   ResumeConfig: {
     ResumeHasBackgroundPattern: boolean;
-    ResumeHasPrintLayout: boolean;
+    ResumeHasPDFPreview: boolean;
+    ResumeHasHTMLPreview: boolean;
     ResumeHasLightBackground: boolean;
     ResumeHasOverview: boolean;
     ResumeHasCertifications: boolean;

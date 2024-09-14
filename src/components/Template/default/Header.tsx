@@ -1,4 +1,4 @@
-import { ResumeData } from "@/components/schemas/ResumeSchema";
+import { ResumeData } from "@/app/schemas/ResumeSchema";
 
 interface HeaderProps {
   data: ResumeData;
@@ -8,7 +8,7 @@ const Header: React.FC<HeaderProps> = ({ data }) => {
   const renderFancyName = (name: string) => {
     return name.split(" ").map((word, index) => (
       <span key={index} className="inline-block">
-        {data.HeaderFancyName && !data.ResumeConfig.ResumeHasPrintLayout ? (
+        {data.HeaderFancyName && !data.ResumeConfig.ResumeHasPDFPreview ? (
           <>
             <span
               className={

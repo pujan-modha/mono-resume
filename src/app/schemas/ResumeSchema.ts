@@ -12,7 +12,8 @@ const ContactIconEnum = z.enum([
 export const ResumeSchema = z.object({
   ResumeConfig: z.object({
     ResumeHasBackgroundPattern: z.boolean().default(false),
-    ResumeHasPrintLayout: z.boolean().default(false),
+    ResumeHasPDFPreview: z.boolean().default(false),
+    ResumeHasHTMLPreview: z.boolean().default(false),
     ResumeHasLightBackground: z.boolean().default(false),
     ResumeHasOverview: z.boolean().default(false),
     ResumeHasCertifications: z.boolean().default(false),

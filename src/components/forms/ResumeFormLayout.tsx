@@ -1,17 +1,17 @@
 import React from "react";
-import HeaderSection from "../sections/HeaderSection";
-import ContactSection from "../sections/ContactSection";
-import EducationSection from "../sections/EducationSection";
-import SkillsSection from "../sections/SkillsSection";
-import ExperienceSection from "../sections/ExperienceSection";
-import ProjectsSection from "../sections/ProjectsSection";
-import CertificationsSection from "../sections/CertificationsSection";
-import AchievementsSection from "../sections/AchievementsSection";
-import OverviewSection from "../sections/OverviewSection";
-import VolunteeringSection from "../sections/VolunteeringSection";
-import PublicationsSection from "../sections/PublicationsSection";
-import ExtracurricularSection from "../sections/ExtracurricularSection";
-import { ResumeData } from "../schemas/ResumeSchema";
+import HeaderSection from "./sections/HeaderSection";
+import ContactSection from "./sections/ContactSection";
+import EducationSection from "./sections/EducationSection";
+import SkillsSection from "./sections/SkillsSection";
+import ExperienceSection from "./sections/ExperienceSection";
+import ProjectsSection from "./sections/ProjectsSection";
+import CertificationsSection from "./sections/CertificationsSection";
+import AchievementsSection from "./sections/AchievementsSection";
+import OverviewSection from "./sections/OverviewSection";
+import VolunteeringSection from "./sections/VolunteeringSection";
+import PublicationsSection from "./sections/PublicationsSection";
+import ExtracurricularSection from "./sections/ExtracurricularSection";
+import { ResumeData } from "../../app/schemas/ResumeSchema";
 import {
   Accordion,
   AccordionItem,
@@ -70,48 +70,79 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
     Volunteering: VolunteeringSection,
   };
 
+  const handlePreviewChange = (previewType: "PDF" | "HTML") => {
+    const isPDFChecked = data.ResumeConfig.ResumeHasPDFPreview;
+    const isHTMLChecked = data.ResumeConfig.ResumeHasHTMLPreview;
+
+    if (previewType === "PDF") {
+      if (!isPDFChecked || isHTMLChecked) {
+        handleVisibilityChange("ResumeHasPDFPreview");
+        if (isHTMLChecked) {
+          handleVisibilityChange("ResumeHasHTMLPreview");
+        }
+      }
+    } else {
+      if (!isHTMLChecked || isPDFChecked) {
+        handleVisibilityChange("ResumeHasHTMLPreview");
+        if (isPDFChecked) {
+          handleVisibilityChange("ResumeHasPDFPreview");
+        }
+      }
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <Accordion type="multiple" className="space-y-4">
         <div className="p-4 border-2">
           <h2 className="font-medium pb-2">Configuration</h2>
-          <div>
-            <div className="grid md:grid-cols-3 gap-2">
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="resume-has-print-layout"
-                  checked={data.ResumeConfig.ResumeHasPrintLayout}
-                  onCheckedChange={() =>
-                    handleVisibilityChange("ResumeHasPrintLayout")
-                  }
+                  id="resume-has-pdf-preview"
+                  checked={data.ResumeConfig.ResumeHasPDFPreview}
+                  onCheckedChange={() => handlePreviewChange("PDF")}
                 />
-                <Label htmlFor="resume-has-print-layout">PDF Preview</Label>
+                <Label htmlFor="resume-has-pdf-preview">PDF Preview</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="resume-has-background-pattern"
-                  checked={data.ResumeConfig.ResumeHasBackgroundPattern}
-                  onCheckedChange={() =>
-                    handleVisibilityChange("ResumeHasBackgroundPattern")
-                  }
+                  id="resume-has-html-preview"
+                  checked={data.ResumeConfig.ResumeHasHTMLPreview}
+                  onCheckedChange={() => handlePreviewChange("HTML")}
                 />
-                <Label htmlFor="resume-has-background-pattern">
-                  Background Pattern
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="resume-has-light-background"
-                  checked={data.ResumeConfig.ResumeHasLightBackground}
-                  onCheckedChange={() =>
-                    handleVisibilityChange("ResumeHasLightBackground")
-                  }
-                />
-                <Label htmlFor="resume-has-light-background">
-                  Light Background
-                </Label>
+                <Label htmlFor="resume-has-html-preview">HTML Preview</Label>
               </div>
             </div>
+            {data.ResumeConfig.ResumeHasHTMLPreview && (
+              <div className="grid md:grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="resume-has-background-pattern"
+                    checked={data.ResumeConfig.ResumeHasBackgroundPattern}
+                    onCheckedChange={() =>
+                      handleVisibilityChange("ResumeHasBackgroundPattern")
+                    }
+                  />
+                  <Label htmlFor="resume-has-background-pattern">
+                    Background Pattern
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="resume-has-light-background"
+                    checked={data.ResumeConfig.ResumeHasLightBackground}
+                    onCheckedChange={() =>
+                      handleVisibilityChange("ResumeHasLightBackground")
+                    }
+                  />
+                  <Label htmlFor="resume-has-light-background">
+                    Light Background
+                  </Label>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

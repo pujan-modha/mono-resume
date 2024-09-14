@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ResumeForm from "@/components/ResumeForm";
-import Resume from "@/components/Template/Resume";
+import ResumeForm from "@/components/forms/ResumeForm";
+import Resume from "@/components/template/Resume";
 import { Button } from "@/components/ui/button";
-import { ResumeData } from "@/components/schemas/ResumeSchema";
+import { ResumeData } from "@/app/schemas/ResumeSchema";
 import {
   Dialog,
   DialogClose,
@@ -52,12 +52,8 @@ const calculateTimeRemaining = (firstGenerationTime: number) => {
 
 const fetchTotalPDFsGenerated = async () => {
   try {
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const response = await fetch("/api/pdf-count", {
+    const response = await fetch("/api/pdf", {
       method: "GET",
-      headers: {
-        "X-Timestamp": timestamp,
-      },
     });
 
     const data = await response.json();
@@ -176,7 +172,7 @@ export default function Home() {
         </html>
       `;
 
-      const response = await fetch("/api/generate-pdf", {
+      const response = await fetch("/api/pdf", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -232,10 +228,14 @@ export default function Home() {
 
   const closeAlertDialog = () => {
     setShowDialog(false);
-    setIsDownloading(false);
-    setIsDownloadComplete(false);
-    setLimitReached(false);
-    setCurrentFunFact(null);
+
+    // Use setTimeout to delay the state resets until after the dialog has closed
+    setTimeout(() => {
+      setIsDownloading(false);
+      setIsDownloadComplete(false);
+      setLimitReached(false);
+      setCurrentFunFact(null);
+    }, 0);
   };
 
   const closeLimitDialog = () => {
@@ -506,10 +506,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <ScrollArea
-              className="h-[100svh] pt-16 border-l"
-              id="scroll-to-top"
-            >
+            <ScrollArea className="h-[100svh] pt-16 border-l">
               <div className="max-w-screen-md w-full mx-auto my-4 px-4 2xl:px-0">
                 {/* <div className="flex mb-2 justify-between items-start text-sm text-gray-600">
                   <span>Remaining PDF generations: {remainingGenerations}</span>
@@ -609,7 +606,7 @@ export default function Home() {
                   <DialogTitle className="hidden">Preview</DialogTitle>
                   <DialogDescription />
                   <div className="fixed top-0 left-0 w-full h-full">
-                    <ScrollArea className="h-[100svh]" id="bg-pattern">
+                    <ScrollArea className="h-[100svh]">
                       {resumeData && (
                         <div
                           ref={previewResumeRef}
@@ -696,7 +693,7 @@ export default function Home() {
                             alt="Buy Me a Coffee"
                             width={16}
                             height={16}
-                            className="w-[16px] h-auto"
+                            className="w-4 h-auto"
                           />
                           <span className="font-bold">Buy Me a Coffee</span>
                         </Button>

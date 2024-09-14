@@ -1,9 +1,10 @@
-import { ResumeData } from "@/components/schemas/ResumeSchema";
+import { ResumeData } from "@/app/schemas/ResumeSchema";
 
 export const dummyData: ResumeData = {
   ResumeConfig: {
-    ResumeHasBackgroundPattern: true,
-    ResumeHasPrintLayout: false,
+    ResumeHasBackgroundPattern: false,
+    ResumeHasPDFPreview: true,
+    ResumeHasHTMLPreview: false,
     ResumeHasLightBackground: false,
     ResumeHasOverview: true,
     ResumeHasCertifications: true,
