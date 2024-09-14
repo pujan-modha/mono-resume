@@ -135,7 +135,6 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
             sectionComponents[sectionKey as keyof typeof sectionComponents];
           const configKey =
             `ResumeHas${sectionKey}` as keyof ResumeData["ResumeConfig"];
-
           return (
             <div key={sectionKey} className="relative">
               <div className="flex items-center my-4">
@@ -144,46 +143,48 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                   onCheckedChange={() => handleVisibilityChange(configKey)}
                 />
                 <Label className="ml-2">{sectionKey}</Label>
-                <div className="absolute right-0 flex gap-2">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => moveSection(sectionKey, "up")}
-                    disabled={index === 0}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="size-4"
+                {data.ResumeConfig[configKey] && (
+                  <div className="absolute right-0 flex gap-2">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => moveSection(sectionKey, "up")}
+                      disabled={index === 0}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => moveSection(sectionKey, "down")}
-                    disabled={index === sectionOrder.length - 1}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="size-4"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="size-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => moveSection(sectionKey, "down")}
+                      disabled={index === sectionOrder.length - 1}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 3a.75.75 0 0 1 .75.75v10.638l3.96-4.158a.75.75 0 1 1 1.08 1.04l-5.25 5.5a.75.75 0 0 1-1.08 0l-5.25-5.5a.75.75 0 1 1 1.08-1.04l3.96 4.158V3.75A.75.75 0 0 1 10 3Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </Button>
-                </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="size-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 3a.75.75 0 0 1 .75.75v10.638l3.96-4.158a.75.75 0 1 1 1.08 1.04l-5.25 5.5a.75.75 0 0 1-1.08 0l-5.25-5.5a.75.75 0 1 1 1.08-1.04l3.96 4.158V3.75A.75.75 0 0 1 10 3Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </Button>
+                  </div>
+                )}
               </div>
               {data.ResumeConfig[configKey] && (
                 <AccordionItem
