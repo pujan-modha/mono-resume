@@ -222,23 +222,27 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                 >
                   <AccordionTrigger>{sectionKey}</AccordionTrigger>
                   <AccordionContent>
-                    <Input
-                      value={
-                        data.ResumeTitles[
-                          `${sectionKey}Title` as keyof typeof data.ResumeTitles
-                        ] || '' // Add this fallback
-                      }
-                      onChange={(e) =>
-                        handleChange(
-                          e,
-                          "ResumeTitles",
-                          0, // Change this to 0
-                          `${sectionKey}Title`
-                        )
-                      }
-                      placeholder="Title"
-                      className="mb-4"
-                    />
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="section-title">Section Title</Label>
+                      <Input
+                        id="section-title"
+                        value={
+                          data.ResumeTitles[
+                            `${sectionKey}Title` as keyof typeof data.ResumeTitles
+                          ] || "" // Add this fallback
+                        }
+                        onChange={(e) =>
+                          handleChange(
+                            e,
+                            "ResumeTitles",
+                            0, // Change this to 0
+                            `${sectionKey}Title`
+                          )
+                        }
+                        placeholder="Title"
+                        className="mb-4"
+                      />
+                    </div>
                     <SectionComponent
                       data={data}
                       handleChange={handleChange}
