@@ -116,7 +116,7 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
               </div>
             </div>
             {data.ResumeConfig.ResumeHasHTMLPreview && (
-              <div className="grid md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="resume-has-background-pattern"
@@ -126,7 +126,7 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                     }
                   />
                   <Label htmlFor="resume-has-background-pattern">
-                    Background Pattern
+                    BG Pattern
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
@@ -137,9 +137,7 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                       handleVisibilityChange("ResumeHasLightBackground")
                     }
                   />
-                  <Label htmlFor="resume-has-light-background">
-                    Light Background
-                  </Label>
+                  <Label htmlFor="resume-has-light-background">Light BG</Label>
                 </div>
               </div>
             )}
