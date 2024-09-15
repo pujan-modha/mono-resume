@@ -57,7 +57,11 @@ const Resume: React.FC<ResumeProps> = ({ data, sectionOrder }) => {
           ResumeConfig.ResumeHasPDFPreview
             ? "p-0"
             : "p-[2.5%]"
-        } ${ResumeConfig.ResumeHasPDFPreview ? "grayscale p-0" : ""}`}
+        } ${
+          ResumeConfig.ResumeHasPDFPreview
+            ? "grayscale print:filter-none p-0"
+            : ""
+        }`}
       >
         <div className="text-mono_foreground bg-mono_background box-border max-w-3xl print:max-w-full mx-auto print:border-none border-4 border-mono_foreground text-pretty w-full">
           <Header data={data} />
