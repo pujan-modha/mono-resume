@@ -21,7 +21,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
+import { Input } from "@/components/ui/input";
 interface ResumeFormLayoutProps {
   data: ResumeData;
   handleChange: (
@@ -222,6 +222,23 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                 >
                   <AccordionTrigger>{sectionKey}</AccordionTrigger>
                   <AccordionContent>
+                    <Input
+                      value={
+                        data.ResumeTitles[
+                          `${sectionKey}Title` as keyof typeof data.ResumeTitles
+                        ] || '' // Add this fallback
+                      }
+                      onChange={(e) =>
+                        handleChange(
+                          e,
+                          "ResumeTitles",
+                          0, // Change this to 0
+                          `${sectionKey}Title`
+                        )
+                      }
+                      placeholder="Title"
+                      className="mb-4"
+                    />
                     <SectionComponent
                       data={data}
                       handleChange={handleChange}

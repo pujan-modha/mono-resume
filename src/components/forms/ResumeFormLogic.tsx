@@ -26,70 +26,84 @@ const useResumeForm = (onSubmit: (data) => void) => {
     field: string,
     subIndex?: number
   ) => {
-    const { value, type, checked } = e.target as
-      | HTMLInputElement
-      | HTMLFormElement;
-    setData((prevData: ResumeData) => {
-      const newData: ResumeData = { ...prevData };
+    if (section === "ResumeTitles") {
+      setData((prevData) => ({
+        ...prevData,
+        ResumeTitles: {
+          ...prevData.ResumeTitles,
+          [field]: e.target.value,
+        },
+      }));
+    } else {
+      const { value, type, checked } = e.target as
+        | HTMLInputElement
+        | HTMLFormElement;
+      setData((prevData: ResumeData) => {
+        const newData: ResumeData = { ...prevData };
 
-      if (section === "OverviewData") {
-        newData.OverviewData = {
-          ...newData.OverviewData,
-          [field]: type === "checkbox" ? checked : value,
-        };
-      } else if (section === "ContactData") {
-        const contactType = index;
-        const existingContactIndex = newData.ContactData.findIndex(
-          (c: any) => c.ContactIcon === contactType.toString()
-        );
-        if (existingContactIndex !== -1) {
-          if (field === "isEnabled" && !checked) {
-            newData.ContactData = newData.ContactData.filter(
-              (_: any, i: number) => i !== existingContactIndex
-            );
-          } else {
-            newData.ContactData[existingContactIndex] = {
-              ...newData.ContactData[existingContactIndex],
-              [field]: type === "checkbox" ? checked : value,
-            };
+        if (section === "OverviewData") {
+          newData.OverviewData = {
+            ...newData.OverviewData,
+            [field]: type === "checkbox" ? checked : value,
+          };
+        } else if (section === "ContactData") {
+          const contactType = index;
+          const existingContactIndex = newData.ContactData.findIndex(
+            (c: any) => c.ContactIcon === contactType.toString()
+          );
+          if (existingContactIndex !== -1) {
+            if (field === "isEnabled" && !checked) {
+              newData.ContactData = newData.ContactData.filter(
+                (_: any, i: number) => i !== existingContactIndex
+              );
+            } else {
+              newData.ContactData[existingContactIndex] = {
+                ...newData.ContactData[existingContactIndex],
+                [field]: type === "checkbox" ? checked : value,
+              };
+            }
+          } else if (field === "isEnabled" && checked) {
+            newData.ContactData.push({
+              ContactIcon: contactType.toString() as ContactIcon,
+              isEnabled: true,
+              ContactLink: "",
+              ContactText: "",
+            });
           }
-        } else if (field === "isEnabled" && checked) {
-          newData.ContactData.push({
-            ContactIcon: contactType.toString() as ContactIcon,
-            isEnabled: true,
-            ContactLink: "",
-            ContactText: "",
-          });
-        }
-      } else if (section) {
-        const sectionData: Record<string, unknown>[] = [...newData[section]];
-        if (index >= sectionData.length) {
-          sectionData[index] = {};
-        }
-        if (["ExperienceDescription", "ProjectDescription"].includes(field)) {
-          if (!Array.isArray(sectionData[index][field])) {
-            sectionData[index][field] = [];
+        } else if (section) {
+          // Ensure the section is an array
+          if (!Array.isArray(newData[section])) {
+            newData[section] = [];
           }
-          if (subIndex !== undefined) {
-            (sectionData[index][field] as string[])[subIndex] = value;
-          } else {
+          const sectionData: Record<string, unknown>[] = [...newData[section]];
+          if (index >= sectionData.length) {
+            sectionData[index] = {};
+          }
+          if (["ExperienceDescription", "ProjectDescription"].includes(field)) {
+            if (!Array.isArray(sectionData[index][field])) {
+              sectionData[index][field] = [];
+            }
+            if (subIndex !== undefined) {
+              (sectionData[index][field] as string[])[subIndex] = value;
+            } else {
+              sectionData[index][field] = value
+                .split("\n")
+                .filter((item: string) => item.trim() !== "");
+            }
+          } else if (["ProjectTechStack", "SkillsName"].includes(field)) {
             sectionData[index][field] = value
-              .split("\n")
-              .filter((item: string) => item.trim() !== "");
+              .split(",")
+              .map((item: string) => item.trim());
+          } else {
+            sectionData[index][field] = type === "checkbox" ? checked : value;
           }
-        } else if (["ProjectTechStack", "SkillsName"].includes(field)) {
-          sectionData[index][field] = value
-            .split(",")
-            .map((item: string) => item.trim());
+          newData[section] = sectionData;
         } else {
-          sectionData[index][field] = type === "checkbox" ? checked : value;
+          newData[field] = type === "checkbox" ? checked : value;
         }
-        newData[section] = sectionData;
-      } else {
-        newData[field] = type === "checkbox" ? checked : value;
-      }
-      return newData;
-    });
+        return newData;
+      });
+    }
   };
 
   const addItem = (section: string) => {

@@ -11,10 +11,21 @@ export interface ResumeData {
     ResumeHasEducation: boolean;
     ResumeHasSkills: boolean;
     ResumeHasProjects: boolean;
-    ResumeHasContact: boolean;
     ResumeHasExtracurricular: boolean;
     ResumeHasVolunteering: boolean;
     ResumeHasPublications: boolean;
+  };
+  ResumeTitles: {
+    OverviewTitle: string;
+    EducationTitle: string;
+    SkillsTitle: string;
+    ExperienceTitle: string;
+    ProjectsTitle: string;
+    CertificationsTitle: string;
+    AchievementsTitle: string;
+    VolunteeringTitle: string;
+    PublicationsTitle: string;
+    ExtracurricularTitle: string;
   };
   HeaderFirstName: string;
   HeaderLastName: string;
