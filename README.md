@@ -1,13 +1,10 @@
 # Mono Resume
 
-![Mono Resume Logo](path/to/logo.png)
+![Mono Resume Logo](public/og.png)
 
 Mono Resume is a modern, minimalist resume builder designed for tech professionals. Built with Next.js, React, and TypeScript, this project offers a user-friendly interface for creating and customizing resumes with a unique code-inspired look.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://github.com/pujan-modha/mono-resume/workflows/Build%20and%20Deploy/badge.svg)](https://github.com/pujan-modha/mono-resume/actions)
-[![npm version](https://badge.fury.io/js/mono-resume.svg)](https://badge.fury.io/js/mono-resume)
-[![codecov](https://codecov.io/gh/pujan-modha/mono-resume/branch/main/graph/badge.svg)](https://codecov.io/gh/pujan-modha/mono-resume)
 
 ## Features
 

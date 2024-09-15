@@ -88,6 +88,7 @@ export default function Home() {
     useState<number>(PDF_LIMIT);
   const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const mainResumeRef = useRef(null);
   const previewResumeRef = useRef(null);
@@ -342,6 +343,9 @@ export default function Home() {
         setTimeRemaining(remainingTime);
         setFirstGenerationTime(storedFirstTime);
       }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setIsLoading(false);
     };
     fetchData();
 
@@ -411,6 +415,22 @@ export default function Home() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   });
+
+  if (isLoading) {
+    return (
+      <div className="h-[100svh] w-screen flex flex-col items-center justify-center bg-mono_background" id="loading-screen">
+        <div className="scale-150 text-xl lg:text-xl font-medium cursor-pointer text-mono_background duration-300 h-16 bg-mono_foreground select-none flex mt-auto"> 
+          <div className="my-auto px-1">
+            <p className="text-nowrap leading-none">Mono</p>
+            <p className="text-nowrap leading-none">Resume</p>
+          </div>
+        </div>
+        <p className="font-medium text-mono_foreground mt-auto mb-4">
+          Loading...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 h-[100svh] overflow-hidden">
