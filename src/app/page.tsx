@@ -418,8 +418,11 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="h-[100svh] w-screen flex flex-col items-center justify-center bg-mono_background" id="loading-screen">
-        <div className="scale-150 text-xl lg:text-xl font-medium cursor-pointer text-mono_background duration-300 h-16 bg-mono_foreground select-none flex mt-auto"> 
+      <div
+        className="h-[100svh] w-screen flex flex-col items-center justify-center bg-mono_background"
+        id="loading-screen"
+      >
+        <div className="scale-150 text-xl lg:text-xl font-medium cursor-pointer text-mono_background duration-300 h-16 bg-mono_foreground select-none flex mt-auto">
           <div className="my-auto px-1">
             <p className="text-nowrap leading-none">Mono</p>
             <p className="text-nowrap leading-none">Resume</p>
@@ -528,12 +531,6 @@ export default function Home() {
             </div>
             <ScrollArea className="h-[100svh] pt-16 border-l">
               <div className="max-w-screen-md w-full mx-auto my-4 px-4 2xl:px-0">
-                {/* <div className="flex mb-2 justify-between items-start text-sm text-gray-600">
-                  <span>Remaining PDF generations: {remainingGenerations}</span>
-                  <span>
-                    Resets in: {timeRemaining.hours}h {timeRemaining.minutes}m
-                  </span>
-                </div> */}
                 <div className="border-2 p-4 mb-4 bg-yellow-100 border-yellow-400 text-yellow-900 text-pretty">
                   <p className="text-xs md:text-sm text-pretty">
                     Note: Include only relevant sections for a more concise and
@@ -606,6 +603,8 @@ export default function Home() {
                     disabled={!resumeData}
                     className="rounded-full shadow-md"
                     onClick={() => setIsPreviewOpen(true)}
+                    aria-label="Preview Resume"
+                    name="preview-resume"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -646,6 +645,8 @@ export default function Home() {
                       disabled={!resumeData}
                       className="rounded-full shadow-md"
                       onClick={() => setIsPreviewOpen(false)}
+                      aria-label="Close Preview"
+                      name="close-preview"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
