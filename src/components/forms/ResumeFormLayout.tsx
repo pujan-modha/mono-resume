@@ -95,7 +95,6 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
     <form onSubmit={handleSubmit}>
       <Accordion type="multiple" className="space-y-4">
         <div className="p-4 border-2">
-          <h2 className="font-medium pb-2">Configuration</h2>
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
@@ -104,7 +103,7 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                   checked={data.ResumeConfig.ResumeHasPDFPreview}
                   onCheckedChange={() => handlePreviewChange("PDF")}
                 />
-                <Label htmlFor="resume-has-pdf-preview">PDF Preview</Label>
+                <Label htmlFor="resume-has-pdf-preview">PDF Mode</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -112,38 +111,40 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                   checked={data.ResumeConfig.ResumeHasHTMLPreview}
                   onCheckedChange={() => handlePreviewChange("HTML")}
                 />
-                <Label htmlFor="resume-has-html-preview">HTML Preview</Label>
+                <Label htmlFor="resume-has-html-preview">HTML Mode</Label>
               </div>
             </div>
-            {data.ResumeConfig.ResumeHasHTMLPreview && (
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="resume-has-background-pattern"
-                    checked={data.ResumeConfig.ResumeHasBackgroundPattern}
-                    onCheckedChange={() =>
-                      handleVisibilityChange("ResumeHasBackgroundPattern")
-                    }
-                  />
-                  <Label htmlFor="resume-has-background-pattern">
-                    BG Pattern
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="resume-has-light-background"
-                    checked={data.ResumeConfig.ResumeHasLightBackground}
-                    onCheckedChange={() =>
-                      handleVisibilityChange("ResumeHasLightBackground")
-                    }
-                  />
-                  <Label htmlFor="resume-has-light-background">Light BG</Label>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-
+        <div className="p-4 border-2">
+          <h2 className="font-medium pb-2">HTML Configuration</h2>
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="resume-has-background-pattern"
+                  checked={data.ResumeConfig.ResumeHasBackgroundPattern}
+                  onCheckedChange={() =>
+                    handleVisibilityChange("ResumeHasBackgroundPattern")
+                  }
+                />
+                <Label htmlFor="resume-has-background-pattern">
+                  BG Pattern
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="resume-has-light-background"
+                  checked={data.ResumeConfig.ResumeHasLightBackground}
+                  onCheckedChange={() =>
+                    handleVisibilityChange("ResumeHasLightBackground")
+                  }
+                />
+                <Label htmlFor="resume-has-light-background">Light BG</Label>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="p-4 border-2">
           <h2 className="font-medium pb-2">Header Information</h2>
           <HeaderSection data={data} handleChange={handleChange} />

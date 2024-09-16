@@ -53,7 +53,6 @@ const Resume: React.FC<ResumeProps> = ({ data, sectionOrder }) => {
       />
       <div
         className={`print:p-0 bg-fixed min-h-[100svh] download-main ${
-          !ResumeConfig.ResumeHasBackgroundPattern ||
           ResumeConfig.ResumeHasPDFPreview
             ? "p-0"
             : "p-[2.5%]"

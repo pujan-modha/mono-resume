@@ -33,21 +33,30 @@ import { funFacts, FunFact } from "@/app/data/facts";
 import Image from "next/image";
 
 const PDF_LIMIT = 60;
-const LIMIT_PERIOD = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const COOLDOWN_PERIOD = 10000; // 10 seconds in milliseconds
 
-const canGeneratePDF = (count: number, firstTime: number) => {
-  const currentTime = Date.now();
-  return currentTime - firstTime > LIMIT_PERIOD || count < PDF_LIMIT;
+// Function to get the next midnight timestamp
+const getNextMidnight = () => {
+  const now = new Date();
+  const nextMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1
+  );
+  return nextMidnight.getTime();
 };
 
-const calculateTimeRemaining = (firstGenerationTime: number) => {
-  const currentTime = Date.now();
-  const endTime = firstGenerationTime + LIMIT_PERIOD;
-  const timeRemaining = Math.max(endTime - currentTime, 0);
-  const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
-  const minutes = Math.floor((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
-  return { hours, minutes };
+// Function to get remaining time until next midnight
+const getTimeUntilMidnight = () => {
+  const now = new Date();
+  const nextMidnight = getNextMidnight();
+  const timeRemaining = nextMidnight - now.getTime();
+  const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+  const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+  return {
+    hours: hours.toString().padStart(2, "0"),
+    minutes: minutes.toString().padStart(2, "0"),
+  };
 };
 
 const fetchTotalPDFsGenerated = async () => {
@@ -73,8 +82,6 @@ const fetchTotalPDFsGenerated = async () => {
 export default function Home() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [totalPDFsGenerated, setTotalPDFsGenerated] = useState<number>(0);
-  const [, setPdfGenerationCount] = useState<number>(0);
-  const [, setFirstGenerationTime] = useState<number>(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadComplete, setIsDownloadComplete] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -82,13 +89,14 @@ export default function Home() {
   const [currentFunFact, setCurrentFunFact] = useState<FunFact | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
-  const [, setLimitReached] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState({ hours: 24, minutes: 0 });
+  const [timeRemaining, setTimeRemaining] = useState(getTimeUntilMidnight());
   const [remainingGenerations, setRemainingGenerations] =
     useState<number>(PDF_LIMIT);
   const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [pdfCount, setPdfCount] = useState<number>(0);
+  const [nextResetTime, setNextResetTime] = useState<number>(getNextMidnight());
 
   const mainResumeRef = useRef(null);
   const previewResumeRef = useRef(null);
@@ -115,25 +123,13 @@ export default function Home() {
       return;
     }
 
-    setLastGenerationTime(currentTime);
-    setCooldownRemaining(10);
-
-    const storedData = localStorage.getItem("pdfGenerationData");
-    let count = 0;
-    let firstTime = 0;
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      count = parsedData.count;
-      firstTime = parsedData.firstTime || Date.now(); // Ensure firstTime is always a number
-    }
-
-    if (!canGeneratePDF(count, firstTime)) {
-      const remaining = calculateTimeRemaining(firstTime);
-      setTimeRemaining(remaining);
-      setLimitReached(true);
+    if (pdfCount >= PDF_LIMIT) {
       setShowLimitDialog(true);
       return;
     }
+
+    setLastGenerationTime(currentTime);
+    setCooldownRemaining(10);
 
     const activeResumeRef = getActiveResumeRef();
     if (!activeResumeRef.current) return;
@@ -142,7 +138,6 @@ export default function Home() {
     setShowDialog(true);
     setCurrentFunFact(getRandomFunFact());
     setIsDownloadComplete(false);
-    setLimitReached(false);
     console.log("Starting PDF generation");
 
     try {
@@ -193,19 +188,14 @@ export default function Home() {
 
         const newTotalCount = await fetchTotalPDFsGenerated();
         setTotalPDFsGenerated(newTotalCount);
-        const newCount = count + 1;
-        const newFirstTime = firstTime === 0 ? Date.now() : firstTime;
+        const newCount = pdfCount + 1;
+        setPdfCount(newCount);
+        setRemainingGenerations(PDF_LIMIT - newCount);
         localStorage.setItem(
           "pdfGenerationData",
-          JSON.stringify({ count: newCount, firstTime: newFirstTime })
+          JSON.stringify({ count: newCount, resetTime: nextResetTime })
         );
-        setPdfGenerationCount(newCount);
-        setFirstGenerationTime(newFirstTime);
         setIsDownloadComplete(true);
-        const remaining = Math.max(PDF_LIMIT - newCount, 0);
-        setRemainingGenerations(remaining);
-        const newTimeRemaining = calculateTimeRemaining(newFirstTime);
-        setTimeRemaining(newTimeRemaining);
       } else {
         console.error("Failed to generate PDF:", await response.text());
       }
@@ -218,6 +208,71 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      const count = await fetchTotalPDFsGenerated();
+      setTotalPDFsGenerated(count);
+
+      const storedData = localStorage.getItem("pdfGenerationData");
+      if (storedData) {
+        const { count, resetTime } = JSON.parse(storedData);
+        if (Date.now() >= resetTime) {
+          // If it's past reset time, reset the count
+          setPdfCount(0);
+          setNextResetTime(getNextMidnight());
+          localStorage.setItem(
+            "pdfGenerationData",
+            JSON.stringify({ count: 0, resetTime: getNextMidnight() })
+          );
+        } else {
+          setPdfCount(count);
+          setNextResetTime(resetTime);
+        }
+      } else {
+        // If no stored data, initialize with current values
+        localStorage.setItem(
+          "pdfGenerationData",
+          JSON.stringify({ count: 0, resetTime: getNextMidnight() })
+        );
+      }
+
+      const defaultSectionOrder = [
+        "Overview",
+        "Skills",
+        "Experience",
+        "Publications",
+        "Projects",
+        "Education",
+        "Certifications",
+        "Achievements",
+        "Extracurricular",
+        "Volunteering",
+      ];
+      setSectionOrder(defaultSectionOrder);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setIsLoading(false);
+    };
+
+    fetchData();
+
+    // Set up an interval to check and update the countdown every minute
+    const intervalId = setInterval(() => {
+      const now = Date.now();
+      if (now >= nextResetTime) {
+        setPdfCount(0);
+        setNextResetTime(getNextMidnight());
+        localStorage.setItem(
+          "pdfGenerationData",
+          JSON.stringify({ count: 0, resetTime: getNextMidnight() })
+        );
+      }
+      setTimeRemaining(getTimeUntilMidnight());
+    }, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [nextResetTime]);
+
+  useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (cooldownRemaining > 0) {
       intervalId = setInterval(() => {
@@ -227,6 +282,34 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, [cooldownRemaining]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "p") {
+        event.preventDefault();
+        if (cooldownRemaining > 0) {
+          console.log(
+            `Please wait ${cooldownRemaining} seconds before generating another PDF.`
+          );
+          return;
+        }
+
+        if (pdfCount < PDF_LIMIT) {
+          generatePDF();
+        } else {
+          setShowLimitDialog(true);
+        }
+      } else if (event.ctrlKey && event.key === "s") {
+        event.preventDefault();
+        downloadHTML();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+
   const closeAlertDialog = () => {
     setShowDialog(false);
 
@@ -234,7 +317,6 @@ export default function Home() {
     setTimeout(() => {
       setIsDownloading(false);
       setIsDownloadComplete(false);
-      setLimitReached(false);
       setCurrentFunFact(null);
     }, 0);
   };
@@ -301,10 +383,10 @@ export default function Home() {
         <meta name="title" content="${resumeData.HeaderFirstName} ${
       resumeData.HeaderLastName
     } - Resume">
+        <meta name="description" content="${resumeData.HeaderTitle}">
         <title>${resumeData.HeaderFirstName} ${
       resumeData.HeaderLastName
     } - Resume</title>
-        <meta name="description" content="${resumeData.HeaderTitle}">
         <style>${styleContent}</style>
       </head>
       <body>
@@ -327,94 +409,6 @@ export default function Home() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const count = await fetchTotalPDFsGenerated();
-      setTotalPDFsGenerated(count);
-
-      const storedData = localStorage.getItem("pdfGenerationData");
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        const remaining = Math.max(PDF_LIMIT - parsedData.count, 0);
-        setRemainingGenerations(remaining);
-        const storedFirstTime = parsedData.firstTime || Date.now(); // Ensure a valid number
-        const remainingTime = calculateTimeRemaining(storedFirstTime);
-        setTimeRemaining(remainingTime);
-        setFirstGenerationTime(storedFirstTime);
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setIsLoading(false);
-    };
-    fetchData();
-
-    const defaultSectionOrder = [
-      "Overview",
-      "Skills",
-      "Experience",
-      "Publications",
-      "Projects",
-      "Education",
-      "Certifications",
-      "Achievements",
-      "Extracurricular",
-      "Volunteering",
-    ];
-    setSectionOrder(defaultSectionOrder);
-
-    // Set up an interval to update the time remaining every minute
-    const intervalId = setInterval(() => {
-      const storedData = localStorage.getItem("pdfGenerationData");
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        const storedFirstTime = parsedData.firstTime || Date.now(); // Ensure a valid number
-        const remainingTime = calculateTimeRemaining(storedFirstTime);
-        setTimeRemaining(remainingTime);
-      }
-    }, 60000); // Update every minute
-
-    return () => clearInterval(intervalId); // Clean up the interval on component unmount
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === "p") {
-        event.preventDefault();
-        if (cooldownRemaining > 0) {
-          console.log(
-            `Please wait ${cooldownRemaining} seconds before generating another PDF.`
-          );
-          return;
-        }
-
-        const storedData = localStorage.getItem("pdfGenerationData");
-        let count = 0;
-        let firstTime = 0;
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-          count = parsedData.count;
-          firstTime = parsedData.firstTime;
-        }
-        if (canGeneratePDF(count, firstTime)) {
-          generatePDF();
-        } else {
-          const remaining = calculateTimeRemaining(firstTime);
-          setTimeRemaining(remaining);
-          setLimitReached(true);
-          setShowLimitDialog(true);
-        }
-      } else if (event.ctrlKey && event.key === "s") {
-        event.preventDefault();
-        downloadHTML();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  });
 
   if (isLoading) {
     return (
@@ -544,51 +538,40 @@ export default function Home() {
                   setSectionOrder={setSectionOrder}
                 />
               </div>
-              <div className="max-w-screen-md w-full mx-auto pb-1 px-4 2xl:px-0 md:flex items-center justify-between">
-                <p className="text-sm text-mono_primary text-center font-medium">
-                  Made with{" "}
-                  <span className="bg-clip-text bg-mono_secondary text-transparent animate-pulse select-none">
-                    ❤️
-                  </span>{" "}
-                  by{" "}
-                  <span className="text-mono_secondary underline">
-                    <Link href="https://pujan.pm" target="_blank">
-                      Pujan Modha
-                    </Link>
-                  </span>
-                </p>
-                <p className="md:text-sm text-mono_primary text-center font-medium opacity-70 text-xs">
-                  Total Resumes Generated:{" "}
-                  <span className="text-mono_secondary">
-                    {totalPDFsGenerated}
-                  </span>
-                </p>
+              <div className="text-center text-mono_secondary/50 my-2 font-semibold">
+                {totalPDFsGenerated.toLocaleString()} Resumes Generated
               </div>
               <div className="h-16 w-full m-auto bg-white border-t flex">
                 <div className="flex flex-col items-center w-full">
-                  <div className="max-w-screen-md w-full mx-auto m-auto px-4 2xl:px-0 md:flex items-center justify-between">
+                  <div className="max-w-screen-md w-full m-auto px-4 2xl:px-0 md:flex items-center justify-between">
                     <p className="text-sm text-mono_primary text-center font-medium">
-                      Licensed under{" "}
+                      Made with{" "}
+                      <span className="bg-clip-text bg-mono_secondary text-transparent animate-pulse select-none">
+                        ❤️
+                      </span>{" "}
+                      by{" "}
                       <span className="text-mono_secondary underline">
-                        <Link
-                          href="https://github.com/pujan-modha/mono-resume/blob/main/LICENSE"
-                          target="_blank"
-                        >
-                          MIT
+                        <Link href="https://pujan.pm" target="_blank">
+                          Pujan Modha
                         </Link>
                       </span>
-                      .
                     </p>
                     <p className="md:text-sm text-mono_primary text-center font-medium text-xs">
-                      Source Code available on{" "}
-                      <span className="text-mono_secondary underline">
-                        <Link
-                          href="https://github.com/pujan-modha/mono-resume"
-                          target="_blank"
-                        >
-                          GitHub
-                        </Link>
-                      </span>
+                      <Link
+                        href="https://github.com/pujan-modha/mono-resume/blob/main/LICENSE"
+                        target="_blank"
+                        className="underline text-mono_secondary"
+                      >
+                        MIT
+                      </Link>{" "}
+                      Licensed.{" "}
+                      <Link
+                        href="https://github.com/pujan-modha/mono-resume"
+                        target="_blank"
+                        className="underline text-mono_secondary"
+                      >
+                        Source Code
+                      </Link>
                       .
                     </p>
                   </div>
