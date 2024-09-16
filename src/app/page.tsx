@@ -564,15 +564,14 @@ export default function Home() {
                       >
                         MIT
                       </Link>{" "}
-                      Licensed.{" "}
+                      Licensed |{" "}
                       <Link
                         href="https://github.com/pujan-modha/mono-resume"
                         target="_blank"
                         className="underline text-mono_secondary"
                       >
-                        Source Code
+                        GitHub
                       </Link>
-                      .
                     </p>
                   </div>
                 </div>
