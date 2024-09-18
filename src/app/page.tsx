@@ -273,7 +273,7 @@ export default function Home() {
   }, [nextResetTime]);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timer;
+    let intervalId: NodeJS.Timeout;
     if (cooldownRemaining > 0) {
       intervalId = setInterval(() => {
         setCooldownRemaining((prev) => Math.max(prev - 1, 0));
