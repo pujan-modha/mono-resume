@@ -279,7 +279,9 @@ export default function Home() {
         setCooldownRemaining((prev) => Math.max(prev - 1, 0));
       }, 1000);
     }
-    return () => clearInterval(intervalId);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [cooldownRemaining]);
 
   useEffect(() => {
