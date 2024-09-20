@@ -3,8 +3,6 @@
 import { NextResponse } from "next/server";
 import Database from "better-sqlite3";
 import PQueue from "p-queue";
-import path from 'path';
-import fs from 'fs';
 
 const BROWSERLESS_URL = process.env.BROWSERLESS_URL!;
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN!;
@@ -12,15 +10,10 @@ const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN!;
 // Initialize the queue
 const queue = new PQueue({ concurrency: 3 });
 
-// Specify the path for the SQLite database
-const dbFolder = path.join(process.cwd(), 'db');
-const dbPath = path.join(dbFolder, 'pdf_count.sqlite');
+// Use an environment variable for the database path, with a default that matches Coolify's volume path
+const dbPath = process.env.DB_PATH || '/db/pdf_count.sqlite';
 
-// Ensure the db folder exists
-if (!fs.existsSync(dbFolder)) {
-  fs.mkdirSync(dbFolder, { recursive: true });
-}
-
+// No need to create the folder as it should already exist in the volume
 // Initialize the database
 const db = new Database(dbPath);
 
