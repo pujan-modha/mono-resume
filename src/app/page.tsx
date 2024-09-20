@@ -275,7 +275,6 @@ export default function Home() {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (cooldownRemaining > 0) {
-      //@ts-expect-error vs-code vilding man
       intervalId = setInterval(() => {
         setCooldownRemaining((prev) => Math.max(prev - 1, 0));
       }, 1000);
