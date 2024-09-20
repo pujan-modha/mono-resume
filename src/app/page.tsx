@@ -275,6 +275,7 @@ export default function Home() {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (cooldownRemaining > 0) {
+      //@ts-expect-error vs-code vilding man
       intervalId = setInterval(() => {
         setCooldownRemaining((prev) => Math.max(prev - 1, 0));
       }, 1000);
@@ -527,9 +528,9 @@ export default function Home() {
             </div>
             <ScrollArea className="h-[100svh] pt-16 border-l">
               <div className="max-w-screen-md w-full mx-auto my-4 px-4 2xl:px-0">
-                <div className="border-2 p-4 mb-4 bg-yellow-100 border-yellow-400 text-yellow-900 text-pretty">
+                <div className="border-2 p-4 mb-4 bg-blue-100 border-blue-400 text-blue-900 text-pretty">
                   <p className="text-xs md:text-sm text-pretty">
-                    Note: Include only relevant sections for a more concise and
+                    Tip: Include only relevant sections for a more concise and
                     effective resume. You can rearrange or remove sections as
                     needed for customization.
                   </p>
@@ -666,7 +667,7 @@ export default function Home() {
             <AlertDialogDescription />
             <div className="flex flex-col space-y-4 text-left">
               {currentFunFact && (
-                <div className="text-sm bg-blue-100 p-4 text-blue-900 border border-blue-400 text-pretty">
+                <div className="text-sm bg-blue-100 p-4 text-blue-900 border-2 border-blue-400 text-pretty">
                   <p className="font-semibold">Did you know?</p>
                   <p className="text-pretty">{currentFunFact.fact}</p>
                 </div>
@@ -691,7 +692,7 @@ export default function Home() {
                       >
                         <Button
                           variant="outline"
-                          className="w-full flex items-center justify-center gap-2 bg-yellow-100 text-yellow-900 border-yellow-400 hover:bg-yellow-200 hover:border-yellow-500 hover:text-yellow-950"
+                          className="w-full flex items-center justify-center gap-2 border-2 bg-yellow-100 text-yellow-900 border-yellow-400 hover:bg-yellow-200 hover:border-yellow-500 hover:text-yellow-950"
                         >
                           <Image
                             src="/bmac-logo.svg"
@@ -705,7 +706,7 @@ export default function Home() {
                       </Link>
                       <Button
                         variant="outline"
-                        className="w-full flex items-center justify-center gap-2 bg-green-100 text-green-900 border-green-400 hover:bg-green-200 hover:border-green-500 hover:text-green-950"
+                        className="w-full flex items-center justify-center gap-2 border-2 bg-green-100 text-green-900 border-green-400 hover:bg-green-200 hover:border-green-500 hover:text-green-950"
                         onClick={() => {
                           if (navigator.share) {
                             navigator

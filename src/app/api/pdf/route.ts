@@ -3,15 +3,28 @@
 import { NextResponse } from "next/server";
 import Database from "better-sqlite3";
 import PQueue from "p-queue";
+import path from 'path';
+import fs from 'fs';
 
 const BROWSERLESS_URL = process.env.BROWSERLESS_URL!;
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN!;
 
-// Initialize the queue and database
+// Initialize the queue
 const queue = new PQueue({ concurrency: 3 });
-const db = new Database("pdf_count.sqlite");
 
-// Initialize database
+// Specify the path for the SQLite database
+const dbFolder = path.join(process.cwd(), 'db');
+const dbPath = path.join(dbFolder, 'pdf_count.sqlite');
+
+// Ensure the db folder exists
+if (!fs.existsSync(dbFolder)) {
+  fs.mkdirSync(dbFolder, { recursive: true });
+}
+
+// Initialize the database
+const db = new Database(dbPath);
+
+// Initialize database schema
 db.exec(`
   CREATE TABLE IF NOT EXISTS pdf_count (id INTEGER PRIMARY KEY, count INTEGER DEFAULT 0);
   INSERT OR IGNORE INTO pdf_count (id, count) VALUES (1, 0);

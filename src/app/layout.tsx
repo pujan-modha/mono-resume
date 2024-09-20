@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        type: "image/jpeg",
+        type: "image/png",
         url: `${process.env.BASE_URL}/og.png`,
       },
     ],
