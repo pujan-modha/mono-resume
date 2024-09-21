@@ -703,8 +703,8 @@ export default function Home() {
                             navigator
                               .share({
                                 title: "Mono Resume",
-                                text: "Check out this awesome resume builder!!\n",
                                 url: "https://monoresume.com",
+                                text: "Check out this awesome resume builder!!",
                               })
                               .catch(console.error);
                           } else {

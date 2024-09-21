@@ -18,9 +18,10 @@ export function ExportDataButton({
       sectionOrder: sectionOrder,
     };
     const jsonString = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
+    const blob = new Blob([jsonString], { type: "application/mono" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "resume.mono";
     document.body.appendChild(link);
