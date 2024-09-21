@@ -22,6 +22,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ExportDataButton } from "@/components/ExportDataButton";
+import { ImportDataButton } from "@/components/ImportDataButton";
+import { Eraser } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface ResumeFormLayoutProps {
   data: ResumeData;
@@ -44,6 +58,8 @@ interface ResumeFormLayoutProps {
   handleVisibilityChange: (section: keyof ResumeData["ResumeConfig"]) => void;
   moveSection: (section: string, direction: "up" | "down") => void;
   sectionOrder: string[];
+  onImport: (importedData: ResumeData, importedSectionOrder: string[]) => void;
+  onReset: () => void;
 }
 
 const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
@@ -57,6 +73,8 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
   handleVisibilityChange,
   moveSection,
   sectionOrder,
+  onImport,
+  onReset,
 }) => {
   const sectionComponents = {
     Overview: OverviewSection,
@@ -69,6 +87,12 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
     Achievements: AchievementsSection,
     Extracurricular: ExtracurricularSection,
     Volunteering: VolunteeringSection,
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
+      e.preventDefault();
+    }
   };
 
   const handlePreviewChange = (previewType: "PDF" | "HTML") => {
@@ -93,7 +117,60 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+      <div className="border-2 p-4 mb-4 bg-blue-100 border-blue-400 text-blue-900 text-pretty">
+        <p className="text-xs md:text-sm text-pretty">
+          Tip: Include only relevant sections for a more concise and effective
+          resume. You can rearrange or remove sections as needed for
+          customization.
+        </p>
+      </div>
+      <div className="flex justify-between mb-4">
+        <div className="flex gap-2">
+          <ExportDataButton data={data} sectionOrder={sectionOrder} />
+          <ImportDataButton onImport={onImport} />
+        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <div>
+              <Button variant="destructive" className="hidden lg:flex">
+                <Eraser className="mr-2 h-4 w-4" />
+                Reset Data
+              </Button>
+              <Button
+                onClick={onReset}
+                variant="destructive"
+                className="lg:hidden flex aspect-square p-0"
+              >
+                <Eraser className="h-4 w-4 m-auto" />
+              </Button>
+            </div>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will delete your resume data.
+                You can export your data before resetting.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row items-center">
+              <div className="mr-auto">
+                <ExportDataButton data={data} sectionOrder={sectionOrder} />
+              </div>
+              <div className="flex space-x-2 ml-auto">
+                <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onReset}
+                  className="border border-red-500 text-red-500 hover:bg-red-500 hover:text-neutral-50 bg-background"
+                >
+                  Reset
+                </AlertDialogAction>
+              </div>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
       <Accordion type="multiple" className="space-y-4">
         {/* Preview mode selection */}
         <div className="p-4 border-2">

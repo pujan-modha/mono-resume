@@ -1,12 +1,15 @@
+// In ResumeForm.tsx
 import React, { useEffect } from "react";
 import useResumeForm from "./ResumeFormLogic";
 import ResumeFormLayout from "./ResumeFormLayout";
 import { ResumeData } from "@/app/schemas/ResumeSchema";
+import { dummyData, defaultSectionOrder } from "@/app/data/data";
 
 interface ResumeFormProps {
   onSubmit: (data: ResumeData) => void;
   sectionOrder: string[];
   setSectionOrder: React.Dispatch<React.SetStateAction<string[]>>;
+  onImport: (data: ResumeData, sectionOrder: string[]) => void;
 }
 
 const ResumeForm: React.FC<ResumeFormProps> = ({
@@ -32,7 +35,8 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       ...prevData,
       ResumeConfig: {
         ...(prevData.ResumeConfig as Record<string, boolean>),
-        [section]: !prevData.ResumeConfig[section as keyof typeof prevData.ResumeConfig],
+        [section]:
+          !prevData.ResumeConfig[section as keyof typeof prevData.ResumeConfig],
       } as typeof prevData.ResumeConfig,
     }));
   };
@@ -55,13 +59,24 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     });
   };
 
-  useEffect(() => {
-    // Call onSubmit with the initial data (either from localStorage or dummy data)
-    onSubmit(data);
-  }, [data, onSubmit]);
+  // Add this function to handle the import
+  const handleImport = (
+    importedData: ResumeData,
+    importedSectionOrder: string[]
+  ) => {
+    setData(importedData);
+    setSectionOrder(importedSectionOrder);
+    onSubmit(importedData);
+  };
+
+  const handleReset = () => {
+    setData(dummyData);
+    setSectionOrder(defaultSectionOrder);
+    onSubmit(dummyData);
+  };
 
   useEffect(() => {
-    // Call onSubmit whenever data changes
+    // Call onSubmit with the initial data (either from localStorage or dummy data)
     onSubmit(data);
   }, [data, onSubmit]);
 
@@ -84,6 +99,8 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
           handleVisibilityChange={handleVisibilityChange}
           moveSection={moveSection}
           sectionOrder={sectionOrder}
+          onImport={handleImport} // Pass the new handleImport function
+          onReset={handleReset}
         />
       </div>
     </div>

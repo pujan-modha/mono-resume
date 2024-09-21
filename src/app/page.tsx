@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { funFacts, FunFact } from "@/app/data/facts";
 import Image from "next/image";
 
@@ -131,6 +131,15 @@ export default function Home() {
 
   const getActiveResumeRef = () => {
     return isPreviewOpen ? previewResumeRef : mainResumeRef;
+  };
+
+  const handleImport = (
+    importedData: ResumeData,
+    importedSectionOrder: string[]
+  ) => {
+    // Handle the imported data here
+    setResumeData(importedData);
+    setSectionOrder(importedSectionOrder);
   };
 
   const generatePDF = async () => {
@@ -462,15 +471,7 @@ export default function Home() {
                               }
                               variant="secondary"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="size-4 mr-1"
-                              >
-                                <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-                                <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-                              </svg>
+                              <Download className="mr-2 h-4 w-4" />
                               <p className="block lg:hidden">HTML</p>
                               <p className="hidden lg:block">Download HTML</p>
                             </Button>
@@ -495,15 +496,7 @@ export default function Home() {
                               {isDownloading ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                  className="size-4 mr-1"
-                                >
-                                  <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-                                  <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-                                </svg>
+                                <Download className="mr-2 h-4 w-4" />
                               )}
                               <p className="block lg:hidden">
                                 {cooldownRemaining > 0
@@ -531,19 +524,14 @@ export default function Home() {
             </div>
             <ScrollArea className="h-[100svh] pt-16 border-l">
               <div className="max-w-screen-md w-full mx-auto my-4 px-4 2xl:px-0">
-                <div className="border-2 p-4 mb-4 bg-blue-100 border-blue-400 text-blue-900 text-pretty">
-                  <p className="text-xs md:text-sm text-pretty">
-                    Tip: Include only relevant sections for a more concise and
-                    effective resume. You can rearrange or remove sections as
-                    needed for customization.
-                  </p>
-                </div>
                 <ResumeForm
+                  onImport={handleImport}
                   onSubmit={handleFormSubmit}
                   sectionOrder={sectionOrder}
                   setSectionOrder={setSectionOrder}
                 />
               </div>
+
               <div className="text-center text-mono_secondary/50 my-2 font-semibold">
                 {totalPDFsGenerated.toLocaleString()} Resumes Generated
               </div>
@@ -716,12 +704,12 @@ export default function Home() {
                               .share({
                                 title: "Mono Resume",
                                 text: "Check out this awesome resume builder!!\n",
-                                url: `${process.env.BASE_URL}`,
+                                url: "https://monoresume.com",
                               })
                               .catch(console.error);
                           } else {
                             navigator.clipboard
-                              .writeText(`${process.env.BASE_URL}`)
+                              .writeText(`https://monoresume.com`)
                               .then(() => alert("Link copied to clipboard!!"))
                               .catch(console.error);
                           }

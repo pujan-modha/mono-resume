@@ -350,3 +350,15 @@ export const dummyData: ResumeData = {
     },
   ],
 };
+export const defaultSectionOrder = [
+  "Overview",
+  "Skills",
+  "Experience",
+  "Publications",
+  "Projects",
+  "Education",
+  "Certifications",
+  "Achievements",
+  "Extracurricular",
+  "Volunteering",
+];
