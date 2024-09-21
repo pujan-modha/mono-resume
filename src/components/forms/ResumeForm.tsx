@@ -32,8 +32,8 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       ...prevData,
       ResumeConfig: {
         ...(prevData.ResumeConfig as Record<string, boolean>),
-        [section]: !(prevData.ResumeConfig as Record<string, boolean>)[section],
-      },
+        [section]: !prevData.ResumeConfig[section as keyof typeof prevData.ResumeConfig],
+      } as typeof prevData.ResumeConfig,
     }));
   };
 
@@ -56,10 +56,19 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   };
 
   useEffect(() => {
-    handleSubmit(
-      new Event("submit") as unknown as React.FormEvent<HTMLFormElement>
-    );
-  }, [handleSubmit]);
+    // Call onSubmit with the initial data (either from localStorage or dummy data)
+    onSubmit(data);
+  }, [data, onSubmit]);
+
+  useEffect(() => {
+    // Call onSubmit whenever data changes
+    onSubmit(data);
+  }, [data, onSubmit]);
+
+  useEffect(() => {
+    // Save section order to localStorage whenever it changes
+    localStorage.setItem("sectionOrder", JSON.stringify(sectionOrder));
+  }, [sectionOrder]);
 
   return (
     <div className="resume-form-container">

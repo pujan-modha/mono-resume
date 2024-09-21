@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 interface ResumeFormLayoutProps {
   data: ResumeData;
   handleChange: (
@@ -94,6 +95,7 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <Accordion type="multiple" className="space-y-4">
+        {/* Preview mode selection */}
         <div className="p-4 border-2">
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-2 gap-2">
@@ -116,40 +118,47 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
             </div>
           </div>
         </div>
-        <div className="p-4 border-2">
-          <h2 className="font-medium pb-2">HTML Configuration</h2>
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="resume-has-background-pattern"
-                  checked={data.ResumeConfig.ResumeHasBackgroundPattern}
-                  onCheckedChange={() =>
-                    handleVisibilityChange("ResumeHasBackgroundPattern")
-                  }
-                />
-                <Label htmlFor="resume-has-background-pattern">
-                  BG Pattern
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="resume-has-light-background"
-                  checked={data.ResumeConfig.ResumeHasLightBackground}
-                  onCheckedChange={() =>
-                    handleVisibilityChange("ResumeHasLightBackground")
-                  }
-                />
-                <Label htmlFor="resume-has-light-background">Light BG</Label>
+
+        {/* HTML Configuration */}
+        {data.ResumeConfig.ResumeHasHTMLPreview && (
+          <div className="p-4 border-2">
+            <h2 className="font-medium pb-2">HTML Configuration</h2>
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="resume-has-background-pattern"
+                    checked={data.ResumeConfig.ResumeHasBackgroundPattern}
+                    onCheckedChange={() =>
+                      handleVisibilityChange("ResumeHasBackgroundPattern")
+                    }
+                  />
+                  <Label htmlFor="resume-has-background-pattern">
+                    BG Pattern
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="resume-has-light-background"
+                    checked={data.ResumeConfig.ResumeHasLightBackground}
+                    onCheckedChange={() =>
+                      handleVisibilityChange("ResumeHasLightBackground")
+                    }
+                  />
+                  <Label htmlFor="resume-has-light-background">Light BG</Label>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Header Information */}
         <div className="p-4 border-2">
           <h2 className="font-medium pb-2">Header Information</h2>
           <HeaderSection data={data} handleChange={handleChange} />
         </div>
 
+        {/* Contact Information */}
         <div className="p-4 border-2">
           <h2 className="font-medium pb-2">Contact Information</h2>
           <ContactSection
@@ -160,6 +169,7 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
           />
         </div>
 
+        {/* Dynamic Sections */}
         {sectionOrder.map((sectionKey, index) => {
           const SectionComponent =
             sectionComponents[sectionKey as keyof typeof sectionComponents];
@@ -230,13 +240,13 @@ const ResumeFormLayout: React.FC<ResumeFormLayoutProps> = ({
                         value={
                           data.ResumeTitles[
                             `${sectionKey}Title` as keyof typeof data.ResumeTitles
-                          ] || "" // Add this fallback
+                          ] || ""
                         }
                         onChange={(e) =>
                           handleChange(
                             e,
                             "ResumeTitles",
-                            0, // Change this to 0
+                            0,
                             `${sectionKey}Title`
                           )
                         }

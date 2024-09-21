@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import { useState } from "react";
-import { ResumeSchema } from "../../app/schemas/ResumeSchema";
+import { useState, useEffect } from "react";
+import { ResumeSchema, ResumeData } from "../../app/schemas/ResumeSchema";
 import { dummyData } from "@/app/data/data";
 
 type ContactIcon =
@@ -12,12 +10,26 @@ type ContactIcon =
   | "gitlab"
   | "x-twitter";
 
-type ResumeData = {
-  [key: string]: unknown;
-};
+const useResumeForm = (onSubmit: (data: ResumeData) => void) => {
+  const [data, setData] = useState<ResumeData>(() => {
+    // Try to load data from localStorage
+    const savedData = localStorage.getItem("resumeData");
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        return ResumeSchema.parse(parsedData);
+      } catch (error) {
+        console.error("Error parsing saved data:", error);
+      }
+    }
+    // If no saved data or parsing fails, use dummy data
+    return ResumeSchema.parse(dummyData);
+  });
 
-const useResumeForm = (onSubmit: (data) => void) => {
-  const [data, setData] = useState<ResumeData>(ResumeSchema.parse(dummyData));
+  useEffect(() => {
+    // Save data to localStorage whenever it changes
+    localStorage.setItem("resumeData", JSON.stringify(data));
+  }, [data]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -72,10 +84,10 @@ const useResumeForm = (onSubmit: (data) => void) => {
           }
         } else if (section) {
           // Ensure the section is an array
-          if (!Array.isArray(newData[section])) {
-            newData[section] = [];
+          if (!Array.isArray(newData[section as keyof ResumeData])) {
+            (newData[section as keyof ResumeData] as unknown[]) = [];
           }
-          const sectionData: Record<string, unknown>[] = [...newData[section]];
+          const sectionData: Record<string, unknown>[] = [...(newData[section as keyof ResumeData] as Record<string, unknown>[])];
           if (index >= sectionData.length) {
             sectionData[index] = {};
           }
@@ -95,11 +107,11 @@ const useResumeForm = (onSubmit: (data) => void) => {
               .split(",")
               .map((item: string) => item.trim());
           } else {
-            sectionData[index][field] = type === "checkbox" ? checked : value;
+            (newData as any)[field] = type === "checkbox" ? checked : value;
           }
-          newData[section] = sectionData;
+          newData[section as keyof ResumeData] = sectionData as unknown as never;
         } else {
-          newData[field] = type === "checkbox" ? checked : value;
+          (newData as any)[field] = type === "checkbox" ? checked : value;
         }
         return newData;
       });
@@ -109,14 +121,14 @@ const useResumeForm = (onSubmit: (data) => void) => {
   const addItem = (section: string) => {
     setData((prevData: ResumeData) => ({
       ...prevData,
-      [section]: [...prevData[section], {}],
+      [section as keyof ResumeData]: [...(prevData[section as keyof ResumeData] as Record<string, unknown>[])],
     }));
   };
 
   const removeItem = (section: string, index: number) => {
     setData((prevData: ResumeData) => ({
       ...prevData,
-      [section]: prevData[section].filter(
+      [section as keyof ResumeData]: (prevData[section as keyof ResumeData] as Record<string, unknown>[]).filter(
         (_: unknown, i: number) => i !== index
       ),
     }));
@@ -126,7 +138,7 @@ const useResumeForm = (onSubmit: (data) => void) => {
     setData((prevData: ResumeData) => {
       return {
         ...prevData,
-        [section]: prevData[section].map(
+        [section as keyof ResumeData]: (prevData[section as keyof ResumeData] as Record<string, unknown>[]).map(
           (item: Record<string, unknown>, i: number) =>
             i === index
               ? {
@@ -150,12 +162,12 @@ const useResumeForm = (onSubmit: (data) => void) => {
     setData((prevData: ResumeData) => {
       return {
         ...prevData,
-        [section]: prevData[section].map(
+        [section as keyof ResumeData]: (prevData[section as keyof ResumeData] as Record<string, unknown>[]).map(
           (item: Record<string, unknown>, i: number) =>
             i === index
               ? {
                   ...item,
-                  [field]: item[field].filter(
+                  [field]: (item[field] as unknown[]).filter(
                     (_: unknown, j: number) => j !== subIndex
                   ),
                 }
@@ -177,7 +189,7 @@ const useResumeForm = (onSubmit: (data) => void) => {
   ) => {
     setData((prevData: ResumeData) => {
       const newData = { ...prevData };
-      const sectionData = [...newData[section]];
+      const sectionData = [...(newData[section as keyof ResumeData] as Record<string, unknown>[])];
       const newIndex = direction === "up" ? index - 1 : index + 1;
 
       if (newIndex >= 0 && newIndex < sectionData.length) {
@@ -185,7 +197,7 @@ const useResumeForm = (onSubmit: (data) => void) => {
           sectionData[newIndex],
           sectionData[index],
         ];
-        newData[section] = sectionData;
+        newData[section as keyof ResumeData] = sectionData as unknown as never;
       }
 
       return newData;

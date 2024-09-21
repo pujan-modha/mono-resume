@@ -88,7 +88,6 @@ export default function Home() {
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const [currentFunFact, setCurrentFunFact] = useState<FunFact | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(getTimeUntilMidnight());
   const [remainingGenerations, setRemainingGenerations] =
     useState<number>(PDF_LIMIT);
@@ -97,6 +96,26 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [pdfCount, setPdfCount] = useState<number>(0);
   const [nextResetTime, setNextResetTime] = useState<number>(getNextMidnight());
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const savedOrder = localStorage.getItem("sectionOrder");
+      if (savedOrder) {
+        return JSON.parse(savedOrder);
+      }
+    }
+    return [
+      "Overview",
+      "Skills",
+      "Experience",
+      "Publications",
+      "Projects",
+      "Education",
+      "Certifications",
+      "Achievements",
+      "Extracurricular",
+      "Volunteering",
+    ];
+  });
 
   const mainResumeRef = useRef(null);
   const previewResumeRef = useRef(null);
@@ -234,21 +253,6 @@ export default function Home() {
           JSON.stringify({ count: 0, resetTime: getNextMidnight() })
         );
       }
-
-      const defaultSectionOrder = [
-        "Overview",
-        "Skills",
-        "Experience",
-        "Publications",
-        "Projects",
-        "Education",
-        "Certifications",
-        "Achievements",
-        "Extracurricular",
-        "Volunteering",
-      ];
-      setSectionOrder(defaultSectionOrder);
-
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsLoading(false);
     };
@@ -711,13 +715,13 @@ export default function Home() {
                             navigator
                               .share({
                                 title: "Mono Resume",
-                                text: "Check out this awesome resume builder!!",
-                                url: "https://mono-resume.pujan.pm",
+                                text: "Check out this awesome resume builder!!\n",
+                                url: `${process.env.BASE_URL}`,
                               })
                               .catch(console.error);
                           } else {
                             navigator.clipboard
-                              .writeText("https://mono-resume.pujan.pm")
+                              .writeText(`${process.env.BASE_URL}`)
                               .then(() => alert("Link copied to clipboard!!"))
                               .catch(console.error);
                           }
