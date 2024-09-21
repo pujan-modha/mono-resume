@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Download } from "lucide-react";
 import { ResumeData } from "@/app/schemas/ResumeSchema";
 import { Input } from "@/components/ui/input";
 
@@ -38,7 +38,7 @@ export function ImportDataButton({ onImport }: ImportDataButtonProps) {
         className="hidden lg:flex"
         onClick={() => document.getElementById("file-input")?.click()}
       >
-        <Upload className="mr-2 h-4 w-4" />
+        <Download className="mr-2 h-4 w-4" />
         Import Data
         <Input
           id="file-input"
@@ -55,7 +55,7 @@ export function ImportDataButton({ onImport }: ImportDataButtonProps) {
         className="lg:hidden flex"
         onClick={() => document.getElementById("file-input")?.click()}
       >
-        <Upload className="mr-2 h-4 w-4" />
+        <Download className="mr-2 h-4 w-4" />
         Import
         <Input
           id="file-input"

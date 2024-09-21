@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Upload } from "lucide-react";
 import { ResumeData } from "@/app/schemas/ResumeSchema";
 
 interface ExportDataButtonProps {
@@ -38,7 +38,7 @@ export function ExportDataButton({
         size="sm"
         className="hidden lg:flex"
       >
-        <Download className="mr-2 h-4 w-4" />
+        <Upload className="mr-2 h-4 w-4" />
         Export Data
       </Button>
       <Button
@@ -47,7 +47,7 @@ export function ExportDataButton({
         size="sm"
         className="lg:hidden flex"
       >
-        <Download className="mr-2 h-4 w-4" />
+        <Upload className="mr-2 h-4 w-4" />
         Export
       </Button>
     </div>
