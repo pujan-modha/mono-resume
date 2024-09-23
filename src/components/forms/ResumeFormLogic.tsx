@@ -38,91 +38,102 @@ const useResumeForm = (onSubmit: (data: ResumeData) => void) => {
     field: string,
     subIndex?: number
   ) => {
-    if (section === "ResumeTitles") {
-      setData((prevData) => ({
-        ...prevData,
-        ResumeTitles: {
-          ...prevData.ResumeTitles,
-          [field]: e.target.value,
-        },
-      }));
-    } else {
-      const { value, type, checked } = e.target as
-        | HTMLInputElement
-        | HTMLFormElement;
-      setData((prevData: ResumeData) => {
-        const newData: ResumeData = { ...prevData };
+    const { value, type, checked } = e.target as HTMLInputElement;
 
-        if (section === "OverviewData") {
-          newData.OverviewData = {
-            ...newData.OverviewData,
-            [field]: type === "checkbox" ? checked : value,
-          };
-        } else if (section === "ContactData") {
-          const contactType = index;
-          const existingContactIndex = newData.ContactData.findIndex(
-            (c: any) => c.ContactIcon === contactType.toString()
-          );
-          if (existingContactIndex !== -1) {
-            if (field === "isEnabled" && !checked) {
-              newData.ContactData = newData.ContactData.filter(
-                (_: any, i: number) => i !== existingContactIndex
-              );
-            } else {
-              newData.ContactData[existingContactIndex] = {
-                ...newData.ContactData[existingContactIndex],
-                [field]: type === "checkbox" ? checked : value,
-              };
-            }
-          } else if (field === "isEnabled" && checked) {
-            newData.ContactData.push({
-              ContactIcon: contactType.toString() as ContactIcon,
-              isEnabled: true,
-              ContactLink: "",
-              ContactText: "",
-            });
-          }
-        } else if (section) {
-          // Ensure the section is an array
-          if (!Array.isArray(newData[section as keyof ResumeData])) {
-            (newData[section as keyof ResumeData] as unknown[]) = [];
-          }
-          const sectionData: Record<string, unknown>[] = [...(newData[section as keyof ResumeData] as Record<string, unknown>[])];
-          if (index >= sectionData.length) {
-            sectionData[index] = {};
-          }
-          if (["ExperienceDescription", "ProjectDescription"].includes(field)) {
-            if (!Array.isArray(sectionData[index][field])) {
-              sectionData[index][field] = [];
-            }
-            if (subIndex !== undefined) {
-              (sectionData[index][field] as string[])[subIndex] = value;
-            } else {
-              sectionData[index][field] = value
-                .split("\n")
-                .filter((item: string) => item.trim() !== "");
-            }
-          } else if (["ProjectTechStack", "SkillsName"].includes(field)) {
-            sectionData[index][field] = value
-              .split(",")
-              .map((item: string) => item.trim());
+    setData((prevData: ResumeData) => {
+      const newData = { ...prevData };
+
+      if (section === "ResumeTitles") {
+        newData.ResumeTitles = {
+          ...newData.ResumeTitles,
+          [field]: value,
+        };
+      } else if (section === "OverviewData") {
+        newData.OverviewData = {
+          ...newData.OverviewData,
+          [field]: type === "checkbox" ? checked : value,
+        };
+      } else if (section === "ContactData") {
+        const contactType = index as unknown as ContactIcon;
+        const existingContactIndex = newData.ContactData.findIndex(
+          (c) => c.ContactIcon === contactType
+        );
+
+        if (existingContactIndex !== -1) {
+          if (field === "isEnabled" && !checked) {
+            // Remove the contact if it's being disabled
+            newData.ContactData = newData.ContactData.filter(
+              (_, i) => i !== existingContactIndex
+            );
           } else {
-            (newData as any)[field] = type === "checkbox" ? checked : value;
+            // Update existing contact
+            newData.ContactData[existingContactIndex] = {
+              ...newData.ContactData[existingContactIndex],
+              [field]: type === "checkbox" ? checked : value,
+            };
           }
-          newData[section as keyof ResumeData] = sectionData as unknown as never;
-        } else {
-          (newData as any)[field] = type === "checkbox" ? checked : value;
+        } else if (field === "isEnabled" && checked) {
+          // Add new contact
+          newData.ContactData.push({
+            ContactIcon: contactType,
+            isEnabled: true,
+            ContactLink: "",
+            ContactText: "",
+          });
         }
-        return newData;
-      });
-    }
+      } else if (Array.isArray(newData[section as keyof ResumeData])) {
+        const sectionData = [
+          ...(newData[section as keyof ResumeData] as any[]),
+        ];
+
+        if (!sectionData[index]) {
+          sectionData[index] = {};
+        }
+
+        if (["ExperienceDescription", "ProjectDescription"].includes(field)) {
+          if (!Array.isArray(sectionData[index][field])) {
+            sectionData[index][field] = [];
+          }
+          if (subIndex !== undefined) {
+            sectionData[index][field][subIndex] = value;
+          } else {
+            sectionData[index][field] = value
+              .split("\n")
+              .filter((item: string) => item.trim() !== "");
+          }
+        } else if (["ProjectTechStack", "SkillsName"].includes(field)) {
+          sectionData[index][field] = value
+            .split(",")
+            .map((item: string) => item);
+        } else {
+          sectionData[index][field] = type === "checkbox" ? checked : value;
+        }
+
+        newData[section as keyof ResumeData] = sectionData as unknown as never;
+      } else {
+        // Handle any other fields that don't fit into the above categories
+        (newData as any)[field] = type === "checkbox" ? checked : value;
+      }
+
+      return newData;
+    });
   };
 
   const addItem = (section: string) => {
-    setData((prevData: ResumeData) => ({
-      ...prevData,
-      [section as keyof ResumeData]: [...(prevData[section as keyof ResumeData] as Record<string, unknown>[])],
-    }));
+    setData((prevData: ResumeData) => {
+      const newData = { ...prevData };
+      const sectionData = Array.isArray(newData[section as keyof ResumeData])
+        ? [...(newData[section as keyof ResumeData] as any[])]
+        : [];
+
+      // Add a new empty item to the section
+      sectionData.push({});
+
+      return {
+        ...newData,
+        [section as keyof ResumeData]: sectionData,
+      };
+    });
   };
 
   const removeItem = (section: string, index: number) => {
