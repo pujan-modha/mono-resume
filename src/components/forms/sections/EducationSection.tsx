@@ -28,7 +28,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
           </Label>
           <Input
             id={`education-institution-${index}`}
-            value={education.EducationInstitutionName}
+            value={education.EducationInstitutionName || ""}
             onChange={(e) =>
               handleChange(
                 e,
@@ -45,7 +45,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             <Label htmlFor={`education-course-${index}`}>Course</Label>
             <Input
               id={`education-course-${index}`}
-              value={education.EducationCourseName}
+              value={education.EducationCourseName || ""}
               onChange={(e) =>
                 handleChange(e, "EducationData", index, "EducationCourseName")
               }
@@ -56,7 +56,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             <Label htmlFor={`education-major-${index}`}>Major</Label>
             <Input
               id={`education-major-${index}`}
-              value={education.EducationMajor}
+              value={education.EducationMajor || ""}
               onChange={(e) =>
                 handleChange(e, "EducationData", index, "EducationMajor")
               }
@@ -69,7 +69,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             <Label htmlFor={`education-from-${index}`}>Time From</Label>
             <Input
               id={`education-from-${index}`}
-              value={education.EducationFromTime}
+              value={education.EducationFromTime || ""}
               onChange={(e) =>
                 handleChange(e, "EducationData", index, "EducationFromTime")
               }
@@ -80,7 +80,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             <Label htmlFor={`education-to-${index}`}>Time To</Label>
             <Input
               id={`education-to-${index}`}
-              value={education.EducationToTime}
+              value={education.EducationToTime || ""}
               onChange={(e) =>
                 handleChange(e, "EducationData", index, "EducationToTime")
               }
@@ -108,7 +108,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             {education.EducationHasMinor && (
               <Input
                 id={`education-minor-${index}`}
-                value={education.EducationMinor}
+                value={education.EducationMinor || ""}
                 onChange={(e) =>
                   handleChange(e, "EducationData", index, "EducationMinor")
                 }
@@ -137,7 +137,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             {education.EducationHasSpecialization && (
               <Input
                 id={`education-specialization-${index}`}
-                value={education.EducationSpecialization}
+                value={education.EducationSpecialization || ""}
                 onChange={(e) =>
                   handleChange(
                     e,
@@ -170,7 +170,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
           {education.EducationHasGPA && (
             <Input
               id={`education-gpa-${index}`}
-              value={education.EducationGPA}
+              value={education.EducationGPA || ""}
               onChange={(e) =>
                 handleChange(e, "EducationData", index, "EducationGPA")
               }

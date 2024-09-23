@@ -25,7 +25,7 @@ const ExtracurricularSection: React.FC<ExtracurricularSectionProps> = ({
           <Label htmlFor={`extracurricular-title-${index}`}>Title</Label>
           <Input
             id={`extracurricular-title-${index}`}
-            value={extracurricular.ExtracurricularTitle}
+            value={extracurricular.ExtracurricularTitle || ""}
             onChange={(e) =>
               handleChange(
                 e,
@@ -43,7 +43,7 @@ const ExtracurricularSection: React.FC<ExtracurricularSectionProps> = ({
           </Label>
           <Input
             id={`extracurricular-organization-${index}`}
-            value={extracurricular.ExtracurricularOrganization}
+            value={extracurricular.ExtracurricularOrganization || ""}
             onChange={(e) =>
               handleChange(
                 e,
@@ -59,7 +59,7 @@ const ExtracurricularSection: React.FC<ExtracurricularSectionProps> = ({
           <Label htmlFor={`extracurricular-years-${index}`}>Years</Label>
           <Input
             id={`extracurricular-years-${index}`}
-            value={extracurricular.ExtracurricularYears}
+            value={extracurricular.ExtracurricularYears || ""}
             onChange={(e) =>
               handleChange(
                 e,

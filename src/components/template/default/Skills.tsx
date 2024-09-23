@@ -21,31 +21,21 @@ const Skills: React.FC<SkillsProps> = ({ data }) => {
               {skills.SkillsTitle}
             </p>
             <ul className="flex flex-wrap gap-[0.75%]">
-              {Array.isArray(skills.SkillsName)
-                ? skills.SkillsName.map((skillname, idx) => (
-                    <li
-                      key={idx}
-                      className={`pointer-events-none print:text-mono_foreground print:border print:border-mono_primary text-xs px-[1%] mb-[1%] ${
-                        data.ResumeConfig.ResumeHasPDFPreview
-                          ? "bg-mono_background text-mono_foreground border border-mono_primary"
-                          : "bg-mono_secondary text-mono_background"
-                      }`}
-                    >
-                      {skillname.trim()}
-                    </li>
-                  ))
-                : skills.SkillsName.split(",").map((skillname, idx) => (
-                    <li
-                      key={idx}
-                      className={`pointer-events-none print:text-mono_foreground print:border print:border-mono_primary text-xs px-[1%] mb-[1%] ${
-                        data.ResumeConfig.ResumeHasPDFPreview
-                          ? "bg-mono_background text-mono_foreground border border-mono_primary"
-                          : "bg-mono_secondary text-mono_background"
-                      }`}
-                    >
-                      {skillname.trim()}
-                    </li>
-                  ))}
+              {(Array.isArray(skills.SkillsName)
+                ? skills.SkillsName
+                : (skills.SkillsName || "").split(",")
+              ).map((skillname, idx) => (
+                <li
+                  key={idx}
+                  className={`pointer-events-none print:text-mono_foreground print:border print:border-mono_primary text-xs px-[1%] mb-[1%] ${
+                    data.ResumeConfig.ResumeHasPDFPreview
+                      ? "bg-mono_background text-mono_foreground border border-mono_primary"
+                      : "bg-mono_secondary text-mono_background"
+                  }`}
+                >
+                  {skillname.trim()}
+                </li>
+              ))}
             </ul>
           </div>
         ))}

@@ -48,7 +48,7 @@ export const ResumeSchema = z.object({
     .array(
       z.object({
         ContactIcon: ContactIconEnum,
-        ContactLink: z.string().url().optional().or(z.literal("")),
+        ContactLink: z.string().optional().or(z.literal("")),
         ContactText: z.string().optional().or(z.literal("")),
         isEnabled: z.boolean().default(true),
       })
@@ -96,7 +96,7 @@ export const ResumeSchema = z.object({
       z.object({
         ProjectName: z.string().default(""),
         ProjectHasLink: z.boolean().default(false),
-        ProjectLink: z.string().url().optional().or(z.literal("")),
+        ProjectLink: z.string().optional().or(z.literal("")),
         ProjectTimeFrom: z.string().default(""),
         ProjectHasTimeTo: z.boolean().default(false),
         ProjectTimeTo: z.string().default(""),
@@ -104,11 +104,11 @@ export const ResumeSchema = z.object({
         ProjectTechStack: z.array(z.string()).default([]),
         ProjectDescription: z.array(z.string()).default([]),
         ProjectHasGitHub: z.boolean().default(false),
-        ProjectGitHubLink: z.string().url().optional().or(z.literal("")),
+        ProjectGitHubLink: z.string().optional().or(z.literal("")),
         ProjectHasGitLab: z.boolean().default(false),
-        ProjectGitLabLink: z.string().url().optional().or(z.literal("")),
+        ProjectGitLabLink: z.string().optional().or(z.literal("")),
         ProjectHasOtherLink: z.boolean().default(false),
-        ProjectOtherLink: z.string().url().optional().or(z.literal("")),
+        ProjectOtherLink: z.string().optional().or(z.literal("")),
       })
     )
     .default([]),
@@ -121,18 +121,10 @@ export const ResumeSchema = z.object({
       z.object({
         certificationCourseName: z.string().default(""),
         certificationHaveCourseLink: z.boolean().default(false),
-        certificationLinkToCourse: z
-          .string()
-          .url()
-          .optional()
-          .or(z.literal("")),
+        certificationLinkToCourse: z.string().optional().or(z.literal("")),
         certificationCoursePlatformName: z.string().default(""),
         certificationHaveCertificate: z.boolean().default(false),
-        certificationLinkToCertificate: z
-          .string()
-          .url()
-          .optional()
-          .or(z.literal("")),
+        certificationLinkToCertificate: z.string().optional().or(z.literal("")),
       })
     )
     .default([]),
@@ -142,11 +134,7 @@ export const ResumeSchema = z.object({
         achievementMain: z.string().default(""),
         achievementEvent: z.string().default(""),
         achievementHaveCertificate: z.boolean().default(false),
-        achievementLinkToCertificate: z
-          .string()
-          .url()
-          .optional()
-          .or(z.literal("")),
+        achievementLinkToCertificate: z.string().optional().or(z.literal("")),
       })
     )
     .default([]),
@@ -166,7 +154,7 @@ export const ResumeSchema = z.object({
         PublicationAuthors: z.string().default(""),
         PublicationJournal: z.string().default(""),
         PublicationYear: z.string().default(""),
-        PublicationDOI: z.string().url().optional().or(z.literal("")),
+        PublicationDOI: z.string().optional().or(z.literal("")),
       })
     )
     .default([]),

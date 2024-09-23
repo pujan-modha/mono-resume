@@ -139,9 +139,9 @@ const useResumeForm = (onSubmit: (data: ResumeData) => void) => {
   const removeItem = (section: string, index: number) => {
     setData((prevData: ResumeData) => ({
       ...prevData,
-      [section as keyof ResumeData]: (prevData[section as keyof ResumeData] as Record<string, unknown>[]).filter(
-        (_: unknown, i: number) => i !== index
-      ),
+      [section as keyof ResumeData]: (
+        prevData[section as keyof ResumeData] as Record<string, unknown>[]
+      ).filter((_: unknown, i: number) => i !== index),
     }));
   };
 
@@ -149,16 +149,17 @@ const useResumeForm = (onSubmit: (data: ResumeData) => void) => {
     setData((prevData: ResumeData) => {
       return {
         ...prevData,
-        [section as keyof ResumeData]: (prevData[section as keyof ResumeData] as Record<string, unknown>[]).map(
-          (item: Record<string, unknown>, i: number) =>
-            i === index
-              ? {
-                  ...item,
-                  [field]: Array.isArray(item[field])
-                    ? [...item[field], ""]
-                    : [""],
-                }
-              : item
+        [section as keyof ResumeData]: (
+          prevData[section as keyof ResumeData] as Record<string, unknown>[]
+        ).map((item: Record<string, unknown>, i: number) =>
+          i === index
+            ? {
+                ...item,
+                [field]: Array.isArray(item[field])
+                  ? [...item[field], ""]
+                  : [""],
+              }
+            : item
         ),
       };
     });
@@ -173,16 +174,17 @@ const useResumeForm = (onSubmit: (data: ResumeData) => void) => {
     setData((prevData: ResumeData) => {
       return {
         ...prevData,
-        [section as keyof ResumeData]: (prevData[section as keyof ResumeData] as Record<string, unknown>[]).map(
-          (item: Record<string, unknown>, i: number) =>
-            i === index
-              ? {
-                  ...item,
-                  [field]: (item[field] as unknown[]).filter(
-                    (_: unknown, j: number) => j !== subIndex
-                  ),
-                }
-              : item
+        [section as keyof ResumeData]: (
+          prevData[section as keyof ResumeData] as Record<string, unknown>[]
+        ).map((item: Record<string, unknown>, i: number) =>
+          i === index
+            ? {
+                ...item,
+                [field]: (item[field] as unknown[]).filter(
+                  (_: unknown, j: number) => j !== subIndex
+                ),
+              }
+            : item
         ),
       };
     });
@@ -200,7 +202,9 @@ const useResumeForm = (onSubmit: (data: ResumeData) => void) => {
   ) => {
     setData((prevData: ResumeData) => {
       const newData = { ...prevData };
-      const sectionData = [...(newData[section as keyof ResumeData] as Record<string, unknown>[])];
+      const sectionData = [
+        ...(newData[section as keyof ResumeData] as Record<string, unknown>[]),
+      ];
       const newIndex = direction === "up" ? index - 1 : index + 1;
 
       if (newIndex >= 0 && newIndex < sectionData.length) {

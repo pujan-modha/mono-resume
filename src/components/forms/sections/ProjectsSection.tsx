@@ -80,7 +80,7 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             <Label htmlFor={`project-name-${index}`}>Project Name</Label>
             <Input
               id={`project-name-${index}`}
-              value={project.ProjectName}
+              value={project.ProjectName || ""}
               onChange={(e) =>
                 handleChange(e, "ProjectsData", index, "ProjectName")
               }
@@ -118,7 +118,7 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               <Label htmlFor={`project-time-from-${index}`}>Start Date</Label>
               <Input
                 id={`project-time-from-${index}`}
-                value={project.ProjectTimeFrom}
+                value={project.ProjectTimeFrom || ""}
                 onChange={(e) =>
                   handleChange(e, "ProjectsData", index, "ProjectTimeFrom")
                 }
@@ -148,7 +148,7 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               {project.ProjectHasTimeTo && (
                 <Input
                   id={`project-time-to-${index}`}
-                  value={project.ProjectTimeTo}
+                  value={project.ProjectTimeTo || ""}
                   onChange={(e) =>
                     handleChange(e, "ProjectsData", index, "ProjectTimeTo")
                   }

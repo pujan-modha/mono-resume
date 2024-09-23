@@ -31,7 +31,7 @@ const PublicationsSection: React.FC<PublicationsSectionProps> = ({
           <Label htmlFor={`publication-title-${index}`}>Title</Label>
           <Input
             id={`publication-title-${index}`}
-            value={publication.PublicationTitle}
+            value={publication.PublicationTitle || ""}
             onChange={(e) =>
               handleChange(e, "PublicationsData", index, "PublicationTitle")
             }
@@ -42,7 +42,7 @@ const PublicationsSection: React.FC<PublicationsSectionProps> = ({
           <Label htmlFor={`publication-authors-${index}`}>Authors</Label>
           <Input
             id={`publication-authors-${index}`}
-            value={publication.PublicationAuthors}
+            value={publication.PublicationAuthors || ""}
             onChange={(e) =>
               handleChange(e, "PublicationsData", index, "PublicationAuthors")
             }
@@ -53,7 +53,7 @@ const PublicationsSection: React.FC<PublicationsSectionProps> = ({
           <Label htmlFor={`publication-journal-${index}`}>Journal</Label>
           <Input
             id={`publication-journal-${index}`}
-            value={publication.PublicationJournal}
+            value={publication.PublicationJournal || ""}
             onChange={(e) =>
               handleChange(e, "PublicationsData", index, "PublicationJournal")
             }
@@ -64,7 +64,7 @@ const PublicationsSection: React.FC<PublicationsSectionProps> = ({
           <Label htmlFor={`publication-year-${index}`}>Year</Label>
           <Input
             id={`publication-year-${index}`}
-            value={publication.PublicationYear}
+            value={publication.PublicationYear || ""}
             onChange={(e) =>
               handleChange(e, "PublicationsData", index, "PublicationYear")
             }
@@ -75,7 +75,7 @@ const PublicationsSection: React.FC<PublicationsSectionProps> = ({
           <Label htmlFor={`publication-doi-${index}`}>DOI</Label>
           <Input
             id={`publication-doi-${index}`}
-            value={publication.PublicationDOI}
+            value={publication.PublicationDOI || ""}
             onChange={(e) =>
               handleChange(e, "PublicationsData", index, "PublicationDOI")
             }

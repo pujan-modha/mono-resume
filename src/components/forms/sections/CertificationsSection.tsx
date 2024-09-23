@@ -29,7 +29,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
             </Label>
             <Input
               id={`certification-course-name-${index}`}
-              value={certification.certificationCourseName}
+              value={certification.certificationCourseName || ""}
               onChange={(e) =>
                 handleChange(
                   e,
@@ -47,7 +47,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
             </Label>
             <Input
               id={`certification-platform-name-${index}`}
-              value={certification.certificationCoursePlatformName}
+              value={certification.certificationCoursePlatformName || ""}
               onChange={(e) =>
                 handleChange(
                   e,
@@ -84,7 +84,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
                 id={`certification-course-link-${index}`}
                 className="w-full"
                 type="url"
-                value={certification.certificationLinkToCourse}
+                value={certification.certificationLinkToCourse || ""}
                 onChange={(e) =>
                   handleChange(
                     e,
@@ -119,7 +119,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               <Input
                 id={`certification-certificate-link-${index}`}
                 type="url"
-                value={certification.certificationLinkToCertificate}
+                value={certification.certificationLinkToCertificate || ""}
                 onChange={(e) =>
                   handleChange(
                     e,

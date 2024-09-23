@@ -32,7 +32,7 @@ const VolunteeringSection: React.FC<VolunteeringSectionProps> = ({
           <Label htmlFor={`volunteering-title-${index}`}>Title</Label>
           <Input
             id={`volunteering-title-${index}`}
-            value={volunteering.VolunteeringTitle}
+            value={volunteering.VolunteeringTitle || ""}
             onChange={(e) =>
               handleChange(e, "VolunteeringData", index, "VolunteeringTitle")
             }
@@ -45,7 +45,7 @@ const VolunteeringSection: React.FC<VolunteeringSectionProps> = ({
           </Label>
           <Input
             id={`volunteering-organization-${index}`}
-            value={volunteering.VolunteeringOrganization}
+            value={volunteering.VolunteeringOrganization || ""}
             onChange={(e) =>
               handleChange(
                 e,
@@ -61,7 +61,7 @@ const VolunteeringSection: React.FC<VolunteeringSectionProps> = ({
           <Label htmlFor={`volunteering-year-${index}`}>Year</Label>
           <Input
             id={`volunteering-year-${index}`}
-            value={volunteering.VolunteeringYear}
+            value={volunteering.VolunteeringYear || ""}
             onChange={(e) =>
               handleChange(e, "VolunteeringData", index, "VolunteeringYear")
             }

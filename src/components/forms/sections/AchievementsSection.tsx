@@ -27,7 +27,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
             <Label htmlFor={`achievement-main-${index}`}>Achievement</Label>
             <Input
               id={`achievement-main-${index}`}
-              value={achievement.achievementMain}
+              value={achievement.achievementMain || ""}
               onChange={(e) =>
                 handleChange(e, "AchievementsData", index, "achievementMain")
               }
@@ -38,7 +38,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
             <Label htmlFor={`achievement-event-${index}`}>Event</Label>
             <Input
               id={`achievement-event-${index}`}
-              value={achievement.achievementEvent}
+              value={achievement.achievementEvent || ""}
               onChange={(e) =>
                 handleChange(e, "AchievementsData", index, "achievementEvent")
               }
@@ -67,7 +67,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
           <Input
             id={`achievement-certificate-link-${index}`}
             type="url"
-            value={achievement.achievementLinkToCertificate}
+            value={achievement.achievementLinkToCertificate || ""}
             onChange={(e) =>
               handleChange(
                 e,
