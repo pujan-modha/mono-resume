@@ -5,9 +5,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ResumeData } from "@/app/types/ResumeData";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 interface ProjectsSectionProps {
   data: ResumeData;
@@ -28,6 +27,7 @@ interface ProjectsSectionProps {
     subIndex: number
   ) => void;
 }
+
 const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   data,
   handleChange,
@@ -36,40 +36,24 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   addSubItem,
   removeSubItem,
 }) => {
-  const handleProjectLinkChange = (
+  const handleLinkChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    index: number
+    index: number,
+    linkType: string
   ) => {
-    let value = e.target.value;
-    if (
-      value &&
-      !value.startsWith("http://") &&
-      !value.startsWith("https://")
-    ) {
-      value = `https://${value}`;
-    }
-    handleChange(e, "ProjectsData", index, "ProjectLink", value);
-  };
+    const value = e.target.value.trim();
+    let fullValue = value;
 
-  const handleProjectLinkCheckboxChange = (checked: boolean, index: number) => {
+    if (!value.startsWith("http://") && !value.startsWith("https://")) {
+      fullValue = `https://${value}`;
+    }
+
     handleChange(
-      {
-        target: { type: "checkbox", checked },
-      } as React.ChangeEvent<HTMLInputElement>,
+      { target: { value: fullValue, type: "text" } } as React.ChangeEvent<HTMLInputElement>,
       "ProjectsData",
       index,
-      "ProjectHasLink",
-      checked.toString()
+      linkType
     );
-    if (!checked) {
-      handleChange(
-        { target: { value: "" } } as React.ChangeEvent<HTMLInputElement>,
-        "ProjectsData",
-        index,
-        "ProjectLink",
-        ""
-      );
-    }
   };
 
   return (
@@ -88,28 +72,123 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             />
           </div>
 
+          {/* Project Link */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id={`project-has-link-${index}`}
                 checked={project.ProjectHasLink}
-                onCheckedChange={(checked) => {
-                  handleProjectLinkCheckboxChange(checked as boolean, index);
-                }}
+                onCheckedChange={(checked) =>
+                  handleChange(
+                    {
+                      target: { type: "checkbox", checked },
+                    } as React.ChangeEvent<HTMLInputElement>,
+                    "ProjectsData",
+                    index,
+                    "ProjectHasLink"
+                  )
+                }
               />
               <Label htmlFor={`project-has-link-${index}`}>Project Link</Label>
             </div>
-
             {project.ProjectHasLink && (
-              <div className="space-y-1">
-                <Input
-                  id={`project-link-${index}`}
-                  type="url"
-                  value={project.ProjectLink?.replace(/^https?:\/\//, "") || ""}
-                  onChange={(e) => handleProjectLinkChange(e, index)}
-                  placeholder="Project Link"
-                />
-              </div>
+              <Input
+                id={`project-link-${index}`}
+                type="url"
+                value={project.ProjectLink?.replace(/^https?:\/\//, "") || ""}
+                onChange={(e) => handleLinkChange(e, index, "ProjectLink")}
+                placeholder="Project Link"
+              />
+            )}
+          </div>
+
+          {/* GitHub Link */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`project-has-github-${index}`}
+                checked={project.ProjectHasGitHub}
+                onCheckedChange={(checked) =>
+                  handleChange(
+                    {
+                      target: { type: "checkbox", checked },
+                    } as React.ChangeEvent<HTMLInputElement>,
+                    "ProjectsData",
+                    index,
+                    "ProjectHasGitHub"
+                  )
+                }
+              />
+              <Label htmlFor={`project-has-github-${index}`}>GitHub Link</Label>
+            </div>
+            {project.ProjectHasGitHub && (
+              <Input
+                id={`project-github-link-${index}`}
+                type="url"
+                value={project.ProjectGitHubLink?.replace(/^https?:\/\//, "") || ""}
+                onChange={(e) => handleLinkChange(e, index, "ProjectGitHubLink")}
+                placeholder="GitHub Link"
+              />
+            )}
+          </div>
+
+          {/* GitLab Link */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`project-has-gitlab-${index}`}
+                checked={project.ProjectHasGitLab}
+                onCheckedChange={(checked) =>
+                  handleChange(
+                    {
+                      target: { type: "checkbox", checked },
+                    } as React.ChangeEvent<HTMLInputElement>,
+                    "ProjectsData",
+                    index,
+                    "ProjectHasGitLab"
+                  )
+                }
+              />
+              <Label htmlFor={`project-has-gitlab-${index}`}>GitLab Link</Label>
+            </div>
+            {project.ProjectHasGitLab && (
+              <Input
+                id={`project-gitlab-link-${index}`}
+                type="url"
+                value={project.ProjectGitLabLink?.replace(/^https?:\/\//, "") || ""}
+                onChange={(e) => handleLinkChange(e, index, "ProjectGitLabLink")}
+                placeholder="GitLab Link"
+              />
+            )}
+          </div>
+
+          {/* Other Link */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`project-has-other-link-${index}`}
+                checked={project.ProjectHasOtherLink}
+                onCheckedChange={(checked) =>
+                  handleChange(
+                    {
+                      target: { type: "checkbox", checked },
+                    } as React.ChangeEvent<HTMLInputElement>,
+                    "ProjectsData",
+                    index,
+                    "ProjectHasOtherLink"
+                  )
+                }
+              />
+              <Label htmlFor={`project-has-other-link-${index}`}>Other Link</Label>
+            </div>
+            {project.ProjectHasOtherLink && (
+              <Input
+                id={`project-other-link-${index}`}
+                type="url"
+                value={project.ProjectOtherLink?.replace(/^https?:\/\//, "") || ""}
+                onChange={(e) => handleLinkChange(e, index, "ProjectOtherLink")}
+                placeholder="Other Link"
+              />
             )}
           </div>
 
